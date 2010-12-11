@@ -4,8 +4,9 @@
  */
 package grandroid;
 
+import android.content.Context;
 import android.content.Intent;
-import grandroid.action.CMD;
+import android.net.Uri;
 
 /**
  *
@@ -13,20 +14,19 @@ import grandroid.action.CMD;
  */
 public class PhoneAgent {
 
-    protected static PhoneAgent instance;
-
-    protected PhoneAgent() {
+    public PhoneAgent() {
     }
 
-    public static PhoneAgent getInstance() {
-        if (instance == null) {
-            instance = new PhoneAgent();
+    public void dial(Context context) {
+        dial(context, null);
+    }
+
+    public void dial(Context context, String tel) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_CALL);
+        if (tel != null && tel.length() > 0) {
+            intent.setData(Uri.parse("tel:" + tel));
         }
-        return instance;
-    }
-
-    public void dial(){
-        Intent intent = new Intent("android.intent.action.CALL_BUTTON");
-        CMD.CURR_FRAME.startActivity(intent);
+        context.startActivity(intent);
     }
 }

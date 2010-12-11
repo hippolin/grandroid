@@ -14,7 +14,7 @@ public class Action {
 
     protected String actionName;
     protected View src;
-    protected String[] args;
+    protected Object[] args;
 
     public Action() {
     }
@@ -45,7 +45,7 @@ public class Action {
         return this;
     }
 
-    public Action setArgs(String ... args) {
+    public Action setArgs(Object ... args) {
         this.args = args;
         return this;
     }

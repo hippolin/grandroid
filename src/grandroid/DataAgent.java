@@ -4,10 +4,14 @@
  */
 package grandroid;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import grandroid.action.CMD;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,32 +20,25 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DataAgent {
 
-    protected static DataAgent instance;
-    protected ConcurrentHashMap data;
+    //protected static ConcurrentHashMap data;
     protected ConcurrentHashMap subject;
+    protected SharedPreferences settings;
 
-    protected DataAgent() {
-        data = new ConcurrentHashMap();
+    public DataAgent(Context context) {
         subject = new ConcurrentHashMap();
-    }
-
-    public static DataAgent getInstance() {
-        if (instance == null) {
-            instance = new DataAgent();
-        }
-        return instance;
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public void keep(View obj) {
         keep(obj, true);
     }
 
-    public void keep(int viewID) {
-        keep(viewID, true);
+    public void keep(Activity activity, int viewID) {
+        keep(activity, viewID, true);
     }
 
-    public void keep(int viewID, boolean fillView) {
-        View obj = CMD.CURR_FRAME.findViewById(viewID);
+    public void keep(Activity activity, int viewID, boolean fillView) {
+        View obj = activity.findViewById(viewID);
         if (obj != null) {
             keep(obj, fillView);
         }
@@ -55,40 +52,48 @@ public class DataAgent {
     }
 
     public void digest() {
-        for (Object obj : subject.values()) {
-            if (obj instanceof View) {
-                save((View) obj);
+        if (subject.size() > 0) {
+            for (Object obj : subject.values()) {
+                if (obj instanceof View) {
+                    save((View) obj);
+                }
             }
+            settings.edit().commit();
         }
     }
 
-    public void save(View obj) {
+    protected void save(View obj) {
+        Editor editor = settings.edit();
         if (obj instanceof TextView) {
-            data.put(obj.getTag(), ((TextView) obj).getText());
+            editor.putString(obj.getTag().toString(), ((TextView) obj).getText().toString());
         } else if (obj instanceof EditText) {
-            data.put(obj.getTag(), ((EditText) obj).getText());
+            editor.putString(obj.getTag().toString(), ((EditText) obj).getText().toString()).commit();
         }
-
+        editor.commit();
     }
 
-    public Object load(View obj) {
-        Object value = data.get(obj.getTag());
+    protected Object load(View obj) {
+        String value = settings.getString(obj.getTag().toString(), "");
         if (value != null) {
             if (obj instanceof TextView) {
-                ((TextView) obj).setText(value.toString());
+                ((TextView) obj).setText(value);
             } else if (obj instanceof EditText) {
-                ((EditText) obj).setText(value.toString());
+                ((EditText) obj).setText(value);
             }
         }
         return value;
     }
 
-    public Object putData(String key, Object obj) {
-        data.put(key, obj);
-        return obj;
+    public Object putPreference(String key, String value) {
+        settings.edit().putString(key, value).commit();
+        return value;
     }
 
-    public Object getData(String key) {
-        return data.get(key);
+    public String getPreference(String key) {
+        return settings.getString(key, "");
+    }
+
+    public String getPreference(String key, String defaultValue) {
+        return settings.getString(key, defaultValue);
     }
 }
