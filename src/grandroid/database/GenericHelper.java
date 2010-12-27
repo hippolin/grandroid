@@ -11,19 +11,43 @@ import java.lang.reflect.Field;
 
 /**
  *
+ * @param <T> 
  * @author Rovers
  */
 public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
 
+    /**
+     * 
+     */
     protected Class<T> classData;
+    /**
+     * 
+     */
     protected TypeMapping[] types;
+    /**
+     * 
+     */
     protected Field[] fields;
+    /**
+     * 
+     */
     protected int indexID;
 
+    /**
+     * 
+     * @param fd
+     * @param objClass
+     */
     public GenericHelper(FaceData fd, Class<T> objClass) {
         this(fd, objClass, true);
     }
 
+    /**
+     * 
+     * @param fd
+     * @param objClass
+     * @param createTable
+     */
     public GenericHelper(FaceData fd, Class<T> objClass, boolean createTable) {
         super(fd, objClass, false);
         classData = objClass;
@@ -40,6 +64,10 @@ public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
         }
     }
 
+    /**
+     * 
+     * @return
+     */
     @Override
     public String getCreationString() {
         String str = "";
@@ -51,11 +79,21 @@ public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
         return str;
     }
 
+    /**
+     * 
+     * @param obj
+     * @return
+     */
     @Override
     public Integer getID(T obj) {
         return obj.get_id();
     }
 
+    /**
+     * 
+     * @param obj
+     * @return
+     */
     @Override
     public ContentValues getKeyValues(T obj) {
 
@@ -80,6 +118,11 @@ public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
         return kvs;
     }
 
+    /**
+     * 
+     * @param cursor
+     * @return
+     */
     @Override
     public T getObject(Cursor cursor) {
         try {
@@ -99,10 +142,23 @@ public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
         }
     }
 
+    /**
+     * 
+     * @param <S>
+     * @param c
+     * @return
+     */
     public <S extends Identifiable> GenericHelper<S> createHelper(Class<S> c) {
         return new GenericHelper<S>(fd, c);
     }
 
+    /**
+     * 
+     * @param <S>
+     * @param c
+     * @param createTable
+     * @return
+     */
     public <S extends Identifiable> GenericHelper<S> createHelper(Class<S> c, boolean createTable) {
         return new GenericHelper<S>(fd, c, createTable);
     }

@@ -10,7 +10,13 @@ package grandroid.anim;
  * @author Rovers
  */
 public interface AnimationEventHandler {
+    /**
+     * 
+     */
     public void beforeAnimation();
 
+    /**
+     * 
+     */
     public void afterAnimation();
 }

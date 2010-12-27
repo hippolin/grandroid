@@ -14,14 +14,26 @@ import android.content.DialogInterface;
  */
 public class AlertAction extends ContextAction {
 
+    /**
+     * 
+     * @param context
+     * @param actionName
+     */
     public AlertAction(Context context, String actionName) {
         super(context, actionName);
     }
 
+    /**
+     * 
+     * @param context
+     */
     public AlertAction(Context context) {
         super(context);
     }
 
+    /**
+     * 
+     */
     protected void init() {
         args = new Object[4];
         args[0] = "確認";
@@ -30,6 +42,14 @@ public class AlertAction extends ContextAction {
         args[3] = new Action("取消");
     }
 
+    /**
+     * 
+     * @param title
+     * @param msg
+     * @param actPositive
+     * @param actNegative
+     * @return
+     */
     public AlertAction setData(String title, String msg, Action actPositive, Action actNegative) {
         if (title != null) {
             args[0] = title;
@@ -46,6 +66,11 @@ public class AlertAction extends ContextAction {
         return this;
     }
 
+    /**
+     * 
+     * @param context
+     * @return
+     */
     @Override
     public boolean execute(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context).setTitle((String) args[0]).setMessage((String) args[1]);

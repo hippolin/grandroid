@@ -9,8 +9,15 @@ import android.view.View;
 
 /**
  *
+ * @param <T> 
  * @author Rovers
  */
 public interface ItemClickable<T> {
+    /**
+     * 
+     * @param index
+     * @param view
+     * @param item
+     */
     public void onClickItem(int index, View view,T item);
 }

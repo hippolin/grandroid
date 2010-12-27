@@ -24,8 +24,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 
 /**
- * An animation that rotates the view on the Y axis between two specified angles.
- * This animation also adds a translation on the Z axis (depth) to improve the effect.
+ * 處理畫面旋轉的問題
  */
 public class FaceRotator extends Animation implements Animation.AnimationListener {
 
@@ -40,10 +39,19 @@ public class FaceRotator extends Animation implements Animation.AnimationListene
     private int state;
     FaceRotator secondRotator;
 
+    /**
+     * 
+     * @param face
+     */
     public FaceRotator(RotationFace face) {
         this(face, 0);
     }
 
+    /**
+     * 
+     * @param face
+     * @param state
+     */
     protected FaceRotator(RotationFace face, int state) {
         super();
         centerX = face.faceGroup.getWidth() / 2.0f;
@@ -69,16 +77,31 @@ public class FaceRotator extends Animation implements Animation.AnimationListene
         }
     }
 
+    /**
+     * 
+     * @param width
+     * @param height
+     * @param parentWidth
+     * @param parentHeight
+     */
     @Override
     public void initialize(int width, int height, int parentWidth, int parentHeight) {
         super.initialize(width, height, parentWidth, parentHeight);
         camera = new Camera();
     }
 
+    /**
+     * 
+     */
     public void play() {
         face.faceGroup.startAnimation(this);
     }
 
+    /**
+     * 
+     * @param interpolatedTime
+     * @param t
+     */
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         float degrees = fromDegrees + ((toDegrees - fromDegrees) * interpolatedTime);
@@ -99,9 +122,17 @@ public class FaceRotator extends Animation implements Animation.AnimationListene
         matrix.postTranslate(centerX, centerY);
     }
 
+    /**
+     * 
+     * @param animation
+     */
     public void onAnimationStart(Animation animation) {
     }
 
+    /**
+     * 
+     * @param animation
+     */
     public void onAnimationEnd(Animation animation) {
         //this.setAnimationListener(null);
         if (state == 0) {
@@ -113,6 +144,10 @@ public class FaceRotator extends Animation implements Animation.AnimationListene
         }
     }
 
+    /**
+     * 
+     * @param animation
+     */
     public void onAnimationRepeat(Animation animation) {
     }
 

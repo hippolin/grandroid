@@ -10,7 +10,6 @@
  */
 package grandroid;
 
-import android.app.KeyguardManager.KeyguardLock;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,32 +19,58 @@ import grandroid.phone.SMSHelper;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
+ * 統一的訊息接收物件，若要使用需要修改AndroidManifest.xml，請參考本類別的原始碼開頭
+ * 應透過Face類別的registerBundledAction來使用本類別
  * @author Rovers
  */
 public class MessageReceiver extends BroadcastReceiver {
 
-    protected String actionClass;
+    /**
+     * 
+     */
     protected ConcurrentHashMap<String, Action> actionMap;
 
+    /**
+     * 應透過Face來生成本類別之實體
+     */
     public MessageReceiver() {
         actionMap = new ConcurrentHashMap<String, Action>();
     }
 
+    /**
+     * 註冊各action事件至目標Context (本函數通常是由Face來呼叫)
+     * @param context
+     */
     public void registerAllEvent(Context context) {
         for (String key : actionMap.keySet()) {
             context.registerReceiver(this, new IntentFilter(key));
         }
     }
 
+    /**
+     * 新增一個對應的事件及處理Action
+     * @param event Android廣播所用的Key
+     * @param action Action物件
+     */
     public void addEvent(String event, Action action) {
         actionMap.put(event, action);
     }
 
+    /**
+     * 查詢actionMap是否已含有某個event的key值
+     * @param event
+     * @return 該event已存在於actionMap
+     */
     public boolean containsEvent(String event) {
         return actionMap.containsKey(event);
     }
 
+    /**
+     * 本函數將被Android呼叫，然後自動依註冊過的event執行各自的Action
+     * 不應直接呼叫本函數
+     * @param context
+     * @param intent
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         if (actionMap.containsKey(intent.getAction())) {

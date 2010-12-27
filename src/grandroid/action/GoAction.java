@@ -16,9 +16,21 @@ import grandroid.DataAgent;
  */
 public class GoAction extends ContextAction {
 
+    /**
+     * 
+     */
     protected Bundle bundle;
+    /**
+     * 
+     */
     protected int flag = -1;
 
+    /**
+     * 
+     * @param context
+     * @param actionName
+     * @param cp
+     */
     public GoAction(Context context, String actionName, String cp) {
         super(context, actionName);
         Class c = null;
@@ -30,16 +42,33 @@ public class GoAction extends ContextAction {
         this.args = new Object[]{c};
     }
 
+    /**
+     * 
+     * @param context
+     * @param actionName
+     * @param c
+     */
     public GoAction(Context context, String actionName, Class c) {
         super(context, actionName);
         this.args = new Object[]{c};
     }
 
+    /**
+     * 
+     * @param bundle
+     * @return
+     */
     public GoAction setBundle(Bundle bundle) {
         this.bundle = bundle;
         return this;
     }
 
+    /**
+     * 
+     * @param key
+     * @param value
+     * @return
+     */
     public GoAction addBundleObject(String key, String value) {
         if (this.bundle == null) {
             bundle = new Bundle();
@@ -48,6 +77,12 @@ public class GoAction extends ContextAction {
         return this;
     }
 
+    /**
+     * 
+     * @param key
+     * @param value
+     * @return
+     */
     public GoAction addBundleObject(String key, int value) {
         if (this.bundle == null) {
             bundle = new Bundle();
@@ -56,6 +91,12 @@ public class GoAction extends ContextAction {
         return this;
     }
 
+    /**
+     * 
+     * @param key
+     * @param strarr
+     * @return
+     */
     public GoAction addBundleObject(String key, String[] strarr) {
         if (this.bundle == null) {
             bundle = new Bundle();
@@ -64,6 +105,12 @@ public class GoAction extends ContextAction {
         return this;
     }
 
+    /**
+     * 
+     * @param key
+     * @param intarr
+     * @return
+     */
     public GoAction addBundleObject(String key, int[] intarr) {
         if (this.bundle == null) {
             bundle = new Bundle();
@@ -72,15 +119,29 @@ public class GoAction extends ContextAction {
         return this;
     }
 
+    /**
+     * 
+     * @param flag
+     * @return
+     */
     public GoAction setFlag(int flag) {
         this.flag = flag;
         return this;
     }
 
+    /**
+     * 
+     * @return
+     */
     public GoAction forgetCurrentFace() {
         return setFlag(Intent.FLAG_ACTIVITY_NO_HISTORY);
     }
 
+    /**
+     * 
+     * @param context
+     * @return
+     */
     @Override
     public boolean execute(Context context) {
 

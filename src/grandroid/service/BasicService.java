@@ -19,13 +19,25 @@ import grandroid.DataAgent;
  */
 public class BasicService extends Service {
 
+    /**
+     * 
+     */
     protected DataAgent dataAgent;
 
+    /**
+     * 
+     * @param arg0
+     * @return
+     */
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
     }
 
+    /**
+     * 
+     * @return
+     */
     public DataAgent getData() {
         if (dataAgent == null) {
             dataAgent = new DataAgent(this);
@@ -34,6 +46,14 @@ public class BasicService extends Service {
         return dataAgent;
     }
 
+    /**
+     * 
+     * @param icon
+     * @param contentTitle
+     * @param contentText
+     * @param targetFrame
+     * @param bundle
+     */
     public void notify(int icon, String contentTitle, String contentText, Class targetFrame, Bundle bundle) {
         NotificationManager manager = (NotificationManager) this.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
         Notification no = new Notification(icon, contentTitle, System.currentTimeMillis());

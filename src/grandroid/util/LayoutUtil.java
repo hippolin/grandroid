@@ -14,9 +14,19 @@ import android.view.View;
  */
 public class LayoutUtil {
 
+    /**
+     * 
+     */
     protected int width;
+    /**
+     * 
+     */
     protected int height;
 
+    /**
+     * 
+     * @param frame
+     */
     public LayoutUtil(Activity frame) {
         DisplayMetrics metrics = new DisplayMetrics();
         frame.getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -25,14 +35,27 @@ public class LayoutUtil {
         height = metrics.heightPixels;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getHeight() {
         return height;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * 
+     * @param size
+     * @return
+     */
     public int[] layoutWidth(int[] size) {
         int totalNeed = 0;
         int availWidth = width;

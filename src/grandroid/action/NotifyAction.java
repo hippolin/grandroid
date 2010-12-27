@@ -18,21 +18,41 @@ import grandroid.view.Face;
  */
 public class NotifyAction extends ContextAction {
 
+    /**
+     * 
+     * @param context
+     * @param actionName
+     */
     public NotifyAction(Context context, String actionName) {
         super(context, actionName);
     }
 
+    /**
+     * 
+     * @param context
+     */
     public NotifyAction(Context context) {
         super(context);
         args = new Object[3];
     }
 
+    /**
+     * 
+     * @param title
+     * @param msg
+     * @return
+     */
     public NotifyAction setData(String title, String msg) {
         args[0] = title;
         args[1] = msg;
         return this;
     }
 
+    /**
+     * 
+     * @param context
+     * @return
+     */
     @Override
     public boolean execute(Context context) {
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

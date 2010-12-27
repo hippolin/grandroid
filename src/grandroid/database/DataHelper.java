@@ -13,17 +13,35 @@ import java.util.List;
 
 /**
  *
+ * @param <T> 
  * @author Rovers
  */
 public abstract class DataHelper<T extends Identifiable> {
 
+    /**
+     * 
+     */
     protected FaceData fd;
+    /**
+     * 
+     */
     protected String tableName;
 
+    /**
+     * 
+     * @param fd
+     * @param c
+     */
     public DataHelper(FaceData fd, Class<T> c) {
         this(fd, c, true);
     }
 
+    /**
+     * 
+     * @param fd
+     * @param c
+     * @param createTable
+     */
     public DataHelper(FaceData fd, Class<T> c, boolean createTable) {
         this.fd = fd;
         Table ann = c.getAnnotation(Table.class);
@@ -33,19 +51,36 @@ public abstract class DataHelper<T extends Identifiable> {
         }
     }
 
+    /**
+     * 
+     * @return
+     */
     public FaceData getFaceData() {
         return fd;
     }
 
+    /**
+     * 
+     * @param fd
+     */
     public void setFaceData(FaceData fd) {
         this.fd = fd;
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean create() {
         fd.createTable(tableName, getCreationString());
         return true;
     }
 
+    /**
+     * 
+     * @param obj
+     * @return
+     */
     public boolean insert(T obj) {
         long result = fd.insert(tableName, this.getKeyValues(obj));
         if (result > -1) {
@@ -54,6 +89,11 @@ public abstract class DataHelper<T extends Identifiable> {
         return result > -1;
     }
 
+    /**
+     * 
+     * @param col
+     * @return
+     */
     public boolean insert(Collection<T> col) {
         try {
             for (T obj : col) {
@@ -69,10 +109,20 @@ public abstract class DataHelper<T extends Identifiable> {
         }
     }
 
+    /**
+     * 
+     * @param obj
+     * @return
+     */
     public boolean update(T obj) {
         return fd.update(tableName, this.getID(obj), this.getKeyValues(obj));
     }
 
+    /**
+     * 
+     * @param col
+     * @return
+     */
     public boolean update(Collection<T> col) {
         try {
             boolean result = true;
@@ -86,22 +136,44 @@ public abstract class DataHelper<T extends Identifiable> {
         }
     }
 
+    /**
+     * 
+     * @param id
+     * @return
+     */
     public boolean delete(Integer id) {
         return fd.delete(tableName, id);
     }
 
+    /**
+     * 
+     * @param where
+     * @return
+     */
     public boolean delete(String where) {
         return fd.delete(tableName, where);
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean truncate() {
         return fd.truncate(tableName);
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean drop() {
         return fd.drop(tableName);
     }
 
+    /**
+     * 
+     * @return
+     */
     public List<T> select() {
         Cursor cursor = fd.select(tableName);
         ArrayList<T> list = new ArrayList<T>();
@@ -116,6 +188,11 @@ public abstract class DataHelper<T extends Identifiable> {
         return list;
     }
 
+    /**
+     * 
+     * @param where
+     * @return
+     */
     public List<T> select(String where) {
         Cursor cursor = fd.select(tableName, where);
         ArrayList<T> list = new ArrayList<T>();
@@ -130,6 +207,13 @@ public abstract class DataHelper<T extends Identifiable> {
         return list;
     }
 
+    /**
+     * 
+     * @param where
+     * @param start
+     * @param count
+     * @return
+     */
     public List<T> select(String where, int start, int count) {
         Cursor cursor = fd.select(tableName, where, start, count);
         ArrayList<T> list = new ArrayList<T>();
@@ -144,6 +228,11 @@ public abstract class DataHelper<T extends Identifiable> {
         return list;
     }
 
+    /**
+     * 
+     * @param id
+     * @return
+     */
     public T selectSingle(Integer id) {
         Cursor cursor = fd.selectSingle(tableName, id);
         T obj = null;
@@ -155,6 +244,11 @@ public abstract class DataHelper<T extends Identifiable> {
         return obj;
     }
 
+    /**
+     * 
+     * @param where
+     * @return
+     */
     public T selectSingle(String where) {
         Cursor cursor = fd.selectSingle(tableName, where);
         T obj = null;
@@ -166,15 +260,37 @@ public abstract class DataHelper<T extends Identifiable> {
         return obj;
     }
 
+    /**
+     * 
+     */
     public void close() {
         fd.close();
     }
 
+    /**
+     * 
+     * @return
+     */
     public abstract String getCreationString();
 
+    /**
+     * 
+     * @param obj
+     * @return
+     */
     public abstract Integer getID(T obj);
 
+    /**
+     * 
+     * @param obj
+     * @return
+     */
     public abstract ContentValues getKeyValues(T obj);
 
+    /**
+     * 
+     * @param cursor
+     * @return
+     */
     public abstract T getObject(Cursor cursor);
 }

@@ -10,7 +10,15 @@ package grandroid.database;
  */
 public interface Identifiable {
 
+    /**
+     * 
+     * @return
+     */
     public Integer get_id();
 
+    /**
+     * 
+     * @param _id
+     */
     public void set_id(Integer _id);
 }

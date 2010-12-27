@@ -12,6 +12,10 @@ import grandroid.AppStatus;
  */
 public class FinishAction extends Action {
 
+    /**
+     * 
+     * @return
+     */
     @Override
     public boolean execute() {
         int pid = android.os.Process.myPid();

@@ -15,14 +15,27 @@ import grandroid.action.ContextAction;
  */
 public abstract class BookFace extends Face {
 
+    /**
+     * 
+     */
     protected FacebookAgent agent;
 
+    /**
+     * 
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         agent = new FacebookAgent(getAppID(), getFacebookIcon(), this);
     }
 
+    /**
+     * 
+     * @param successAction
+     * @param failAction
+     * @param getUserData
+     */
     public void loginFacebook(final ContextAction successAction, final ContextAction failAction, final boolean getUserData) {
         agent.login(new AuthListener() {
 
@@ -43,10 +56,21 @@ public abstract class BookFace extends Face {
         });
     }
 
+    /**
+     * 
+     */
     public void logoutFacebook() {
         agent.logout();
     }
+    /**
+     * 
+     * @return
+     */
     protected abstract String getAppID();
 
+    /**
+     * 
+     * @return
+     */
     protected abstract int getFacebookIcon();
 }

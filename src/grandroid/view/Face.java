@@ -7,6 +7,7 @@ package grandroid.view;
 import android.app.Activity;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,7 +37,6 @@ import grandroid.adapter.ItemClickable;
 import grandroid.util.ImageUtil;
 import java.util.ArrayList;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -44,21 +44,42 @@ import java.util.logging.Logger;
  */
 public class Face extends Activity {
 
+    /**
+     * 
+     */
     protected ArrayList<Action> menuList;
+    /**
+     * 
+     */
     protected MessageReceiver bundledReceiver = null;
+    /**
+     * 
+     */
     protected int menuID;
+    /**
+     * 
+     */
     protected Menu menu;
+    /**
+     * 
+     */
     protected boolean disableLock = true;
+    /**
+     * 
+     */
     protected DataAgent dataAgent;
-    protected ViewGroup lastLayout;
-    protected ViewGroup mainLayout;
-    protected int viewID = 1;
 
+    /**
+     * 
+     */
     public Face() {
         super();
-
     }
 
+    /**
+     * 取得資料代理人，一般用途為保存view的資料，以及存取SharedPreference
+     * @return 資料代理人
+     */
     public DataAgent getData() {
         if (dataAgent == null) {
             dataAgent = new DataAgent(this);
@@ -66,6 +87,11 @@ public class Face extends Activity {
         return dataAgent;
     }
 
+    /**
+     * 載入以view為單位的Layout XML (一般是以Activity為單位)
+     * @param resourceID
+     * @return 具體化後的View物件
+     */
     public View loadLayout(int resourceID) {
         LayoutInflater vi = this.getLayoutInflater();
         View vv = vi.inflate(resourceID, null, false);
@@ -74,26 +100,57 @@ public class Face extends Activity {
         //layout.addView(vv, new LinearLayout.LayoutParams(layout.getLayoutParams().width, layout.getLayoutParams().height));
     }
 
+    /**
+     * 將view物件註冊為「需保存值資料」，同時載入前次的值
+     * 該view物件應設定過tag
+     * @param view
+     */
     protected void keepViewData(View view) {
         getData().keep(view);
     }
 
+    /**
+     * 將view物件註冊為「需保存值資料」，同時載入前次的值
+     * 該view物件應設定過tag
+     * @param view
+     * @param autofill 是否載入前次的值
+     */
     protected void keepViewData(View view, boolean autofill) {
         getData().keep(view, autofill);
     }
 
+    /**
+     * 將view物件註冊為「需保存值資料」，同時載入前次的值
+     * 該view物件應設定過tag
+     * @param viewID
+     */
     protected void keepViewData(int viewID) {
         getData().keep(this, viewID);
     }
 
+    /**
+     * 將view物件註冊為「需保存值資料」，同時載入前次的值
+     * 該view物件應設定過tag
+     * @param viewID
+     * @param autofill 是否載入前次的值
+     */
     protected void keepViewData(int viewID, boolean autofill) {
         getData().keep(this, viewID, autofill);
     }
 
+    /**
+     * 
+     * @param menuID
+     */
     protected void setMenuID(int menuID) {
         this.menuID = menuID;
     }
 
+    /**
+     * 
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -107,6 +164,11 @@ public class Face extends Activity {
         return true;
     }
 
+    /**
+     * 
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         try {
@@ -119,39 +181,90 @@ public class Face extends Activity {
         return true;
     }
 
-    public void log(String msg) {
-        Logger.getLogger(Face.class.getName()).log(Level.INFO, msg);
+    /**
+     * Log message with info leverl
+     * @param msg
+     */
+    public void logi(String msg) {
+        Log.i("grandroid", msg);
     }
 
+    /**
+     * Log message with error leverl
+     * @param msg
+     */
+    public void loge(String msg) {
+        Log.e("grandroid", msg);
+    }
+
+    /**
+     * 顯示Toast訊息
+     * @param msg
+     */
     public void toast(String msg) {
         new ToastAction(this).setMessage(msg).execute();
     }
 
+    /**
+     * 顯示帶有一個OK按鈕的Dialog
+     * @param title
+     * @param msg
+     */
     public void alert(String title, String msg) {
         //System.out.println(msg);
         alert(title, msg, new Action().setActionName("OK"));
     }
 
+    /**
+     * 顯示帶有一個按鈕的Dialog，按鈕名稱為actPositive的name屬性
+     * @param title
+     * @param msg
+     * @param actPositive
+     */
     public void alert(String title, String msg, final Action actPositive) {
         alert(title, msg, actPositive, null);
     }
 
+    /**
+     * 顯示帶有兩個按鈕的Dialog，按鈕名稱為actPositive、actNegative的name屬性
+     * @param title
+     * @param msg
+     * @param actPositive
+     * @param actNegative
+     */
     public void alert(String title, String msg, final Action actPositive, final Action actNegative) {
         new AlertAction(this).setData(title, msg, actPositive, actNegative).execute();
     }
 
+    /**
+     * 顯示訊息及標題於Notification Bar
+     * @param title
+     * @param msg
+     */
     public void notify(String title, String msg) {
         new NotifyAction(this).setData(title, msg).execute();
     }
 
+    /**
+     * 將按鈕設定為按下時觸發Action的execute方法
+     * 只支援Button與ImageButton
+     * @param btnID Resource ID
+     * @param act
+     */
     protected void setButtonEvent(int btnID, final Action act) {
         final View btn = findViewById(btnID);
         setButtonEvent(btn, act);
     }
 
+    /**
+     * 將按鈕設定為按下時觸發Action的execute方法
+     * 只支援Button與ImageButton
+     * @param btn
+     * @param act
+     */
     protected void setButtonEvent(View btn, final Action act) {
 
-        btn.setOnClickListener(new View.OnClickListener()   {
+        btn.setOnClickListener(new View.OnClickListener()          {
 
             public void onClick(View view) {
                 act.setSrc(view);
@@ -160,6 +273,11 @@ public class Face extends Activity {
         });
     }
 
+    /**
+     * 新增一個menu選項，menu的名字是act的name屬性 (按下手機menu鍵時跳出來的選單，即ContextMenu)
+     * 只適合製作靜態的menu
+     * @param act
+     */
     protected void addMenu(final Action act) {
         if (menuList == null) {
             menuList = new ArrayList<Action>();
@@ -168,11 +286,9 @@ public class Face extends Activity {
         //menuActions.put(menuItemID, act);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
+    /**
+     * 
+     */
     @Override
     protected void onRestart() {
         if (AppStatus.FIHISHED) {
@@ -185,6 +301,9 @@ public class Face extends Activity {
         }
     }
 
+    /**
+     * 
+     */
     @Override
     protected void onResume() {
         if (AppStatus.FIHISHED) {
@@ -199,20 +318,17 @@ public class Face extends Activity {
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        log("Arcface onStop is called..");
-        if (bundledReceiver != null) {
-            this.unregisterReceiver(bundledReceiver);
-        }
-    }
-
+    /**
+     * 
+     */
     @Override
     protected void onPause() {
         super.onPause();
         if (dataAgent != null) {
             dataAgent.digest();
+        }
+        if (bundledReceiver != null) {
+            this.unregisterReceiver(bundledReceiver);
         }
 //        if (receiver != null) {
 //            if (disableLock) {
@@ -223,6 +339,13 @@ public class Face extends Activity {
 //        }
     }
 
+    /**
+     * 向Android註冊欲處理的事件
+     * 使用本機制需注意，只在頁面為目前使用者觀看的頁面時有效
+     * 當本頁面發生onPouse事件後，即不再有效，直到onResume發生，又會重新有效
+     * @param event
+     * @param action
+     */
     protected void registerBundledAction(String event, ContextAction action) {
         if (bundledReceiver == null) {
             bundledReceiver = new MessageReceiver();
@@ -231,244 +354,12 @@ public class Face extends Activity {
         this.registerReceiver(bundledReceiver, new IntentFilter(event));
     }
 
+    /**
+     * 移除所有向Android註冊的事件
+     */
     protected void unregisterAllBundledAction() {
         if (bundledReceiver != null) {
             this.unregisterReceiver(bundledReceiver);
-        }
-    }
-
-    public View add(View view) {
-        lastLayout.addView(view);
-        return view;
-    }
-
-    public View add(View view, LinearLayout.LayoutParams params) {
-        lastLayout.addView(view, params);
-        return view;
-    }
-
-    public TextView addTextView() {
-        return addTextView("");
-    }
-
-    public TextView addTextView(String text) {
-        TextView tv = new TextView(this);
-        tv.setTextColor(Color.BLACK);
-        tv.setBackgroundColor(Color.argb(0, 0, 0, 0));
-        tv.setTextSize(20);
-        tv.setText(text);
-        lastLayout.addView(tv);
-        return tv;
-    }
-
-    public EditText addEditText(String text) {
-        EditText et = new EditText(this);
-        et.setTextColor(Color.BLACK);
-        //et.setBackgroundColor(Color.argb(0, 0, 0, 0));
-        et.setTextSize(20);
-        et.setText(text);
-        lastLayout.addView(et);
-        return et;
-    }
-
-    public Button addButton(String text) {
-        Button btn = new Button(this);
-        btn.setTextColor(Color.BLACK);
-        btn.setTextSize(20);
-        btn.setText(text);
-
-        lastLayout.addView(btn, layWW(lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL ? 1 : 0));
-        return btn;
-    }
-
-    public ImageButton addImageButton(int resourceID) {
-        ImageButton btn = new ImageButton(this);
-        btn.setBackgroundColor(Color.argb(0, 255, 255, 0));
-        btn.setImageResource(resourceID);
-        lastLayout.addView(btn, layWW(lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL ? 1 : 0));
-        return btn;
-    }
-
-    public ImageButton addImageButton(String url) {
-        ImageButton btn = new ImageButton(this);
-        btn.setBackgroundColor(Color.argb(0, 255, 255, 0));
-        btn.setImageBitmap(ImageUtil.loadBitmap(url));
-        lastLayout.addView(btn, layWW(lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL ? 1 : 0));
-        return btn;
-    }
-
-    public ListView addListView(final BaseAdapter adapter) {
-        ListView lv = new ListView(this);
-        lv.setBackgroundColor(Color.WHITE);
-        lv.setCacheColorHint(Color.WHITE);
-        lv.setAdapter(adapter);
-        lastLayout.addView(lv, layFF());
-        
-        if(ItemClickable.class.isInstance(adapter)){
-            lv.setOnItemClickListener(new OnItemClickListener(){
-
-                public void onItemClick(AdapterView<?> parent, View view, int index, long arg3) {
-                    ((ItemClickable)adapter).onClickItem(index, view, adapter.getItem(index));
-                }
-                
-            });
-        }
-        
-        return lv;
-    }
-
-    public LinearLayout.LayoutParams layFF() {
-        return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
-    }
-
-    public LinearLayout.LayoutParams layFW() {
-        return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-    }
-
-    public LinearLayout.LayoutParams layWW(float weight) {
-        if (weight > 0) {
-            return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, weight);
-        } else {
-            return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        }
-    }
-
-    public LinearLayout createMainLayout() {
-        LinearLayout ll = new LinearLayout(this);
-        ll.setBackgroundColor(Color.WHITE);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        mainLayout = ll;
-        lastLayout = ll;
-        this.setContentView(ll);
-        return ll;
-    }
-
-    public LinearLayout createRowLayout() {
-        return createRowLayout(false);
-    }
-
-    public LinearLayout createRowLayout(boolean withScroll) {
-        LinearLayout ll = new LinearLayout(this);
-        //ll.setBackgroundColor(Color.WHITE);
-        ll.setOrientation(LinearLayout.HORIZONTAL);
-
-        if (withScroll) {
-            ScrollView sv = new ScrollView(this);
-            sv.setScrollContainer(true);
-            sv.setFocusable(true);
-            sv.addView(ll);
-            lastLayout.addView(sv, layFF());
-        } else {
-            if (lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL) {
-                lastLayout.addView(ll, layWW(0));
-            } else {
-                lastLayout.addView(ll, layFW());
-            }
-        }
-        lastLayout = ll;
-        return ll;
-    }
-
-    public LinearLayout createColLayout() {
-        return createColLayout(false);
-    }
-
-    public LinearLayout createColLayout(boolean withScroll) {
-        LinearLayout ll = new LinearLayout(this);
-        //ll.setBackgroundColor(Color.WHITE);
-        ll.setOrientation(LinearLayout.VERTICAL);
-        if (withScroll) {
-            ScrollView sv = new ScrollView(this);
-            sv.setScrollContainer(true);
-            sv.setFocusable(true);
-            sv.addView(ll);
-            lastLayout.addView(sv, layFW());
-        } else {
-            lastLayout.addView(ll, layWW(1));
-        }
-        lastLayout = ll;
-        return ll;
-    }
-
-    public void insertTopBanner(View view) {
-        boolean isParentRelative = getParentOfLastLayout() instanceof RelativeLayout;
-        ViewGroup parent = getParentOfLastLayout();
-        parent.removeView(lastLayout);
-        RelativeLayout rl;
-        if (isParentRelative) {
-            rl = (RelativeLayout) parent;
-        } else {
-            rl = new RelativeLayout(this);
-            rl.setBackgroundColor(Color.WHITE);
-        }
-
-        RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        view.setId(viewID);
-        rllp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        rl.addView(view, rllp);
-
-        RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
-        rllpMain.addRule(RelativeLayout.BELOW, viewID++);
-        if (rl.getChildCount() == 2) {
-            rllpMain.addRule(RelativeLayout.ABOVE, rl.getChildAt(0).getId());
-        }
-        rl.addView(lastLayout, rllpMain);
-        if (!isParentRelative) {
-            parent.addView(rl, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
-        }
-    }
-
-    public void insertBottomBanner(View view) {
-        boolean isParentRelative = getParentOfLastLayout() instanceof RelativeLayout;
-        ViewGroup parent = getParentOfLastLayout();
-        parent.removeView(lastLayout);
-        RelativeLayout rl;
-        if (isParentRelative) {
-            rl = (RelativeLayout) parent;
-        } else {
-            rl = new RelativeLayout(this);
-            rl.setBackgroundColor(Color.WHITE);
-        }
-
-        RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        view.setId(viewID);
-        rllp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        rl.addView(view, rllp);
-
-        RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
-        rllpMain.addRule(RelativeLayout.ABOVE, viewID++);
-        if (rl.getChildCount() == 2) {
-            rllpMain.addRule(RelativeLayout.BELOW, rl.getChildAt(0).getId());
-        }
-        rl.addView(lastLayout, rllpMain);
-        if (!isParentRelative) {
-            parent.addView(rl, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
-        }
-    }
-
-    public void escape() {
-        if (lastLayout != mainLayout) {
-            lastLayout = getParentOfLastLayout();
-        }
-    }
-
-    public ViewGroup styliseCenter() {
-        if (lastLayout instanceof LinearLayout) {
-            ((LinearLayout) lastLayout).setGravity(Gravity.CENTER);
-        }
-        return lastLayout;
-    }
-
-    public ViewGroup styliseBackground(int resourceID) {
-        lastLayout.setBackgroundResource(resourceID);
-        return lastLayout;
-    }
-
-    protected ViewGroup getParentOfLastLayout() {
-        if (lastLayout.getParent() instanceof ScrollView) {
-            return (ViewGroup) lastLayout.getParent().getParent();
-        } else {
-            return (ViewGroup) lastLayout.getParent();
         }
     }
 }

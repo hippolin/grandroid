@@ -19,18 +19,50 @@ import android.widget.ViewFlipper;
  */
 public class FaceTouchSensor2 extends SimpleOnGestureListener {
 
+    /**
+     * 
+     */
     protected ArrayFace face;
     private GestureDetector gestureScanner;
+    /**
+     * 
+     */
     protected Animation aniLeftIn;
+    /**
+     * 
+     */
     protected Animation aniLeftOut;
+    /**
+     * 
+     */
     protected Animation aniRightIn;
+    /**
+     * 
+     */
     protected Animation aniRightOut;
+    /**
+     * 
+     */
     protected FaceAnimationListener aniListener;
+    /**
+     * 
+     */
     protected ViewFlipper faceFlipper;
+    /**
+     * 
+     */
     protected LinearLayout activeLayout;
+    /**
+     * 
+     */
     protected LinearLayout fakeLayout;
 
     //protected Face face;
+    /**
+     * 
+     * @param face
+     * @param animationArray
+     */
     public FaceTouchSensor2(final ArrayFace face, int[] animationArray) {
         this.face = face;
 
@@ -57,23 +89,48 @@ public class FaceTouchSensor2 extends SimpleOnGestureListener {
         face.addContentView(faceFlipper, new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
     }
 
+    /**
+     * 
+     * @return
+     */
     public LinearLayout getActiveLayout() {
         return activeLayout;
     }
 
+    /**
+     * 
+     * @return
+     */
     public LinearLayout getFakeLayout() {
         return fakeLayout;
     }
 
+    /**
+     * 
+     * @param event
+     * @return
+     */
     public boolean onTouchEvent(MotionEvent event) {
         return gestureScanner.onTouchEvent(event);
     }
 
+    /**
+     * 
+     * @param me
+     */
     @Override
     public void onLongPress(MotionEvent me) {
         face.onLongPress(me);
     }
 
+    /**
+     * 
+     * @param e1
+     * @param e2
+     * @param velocityX
+     * @param velocityY
+     * @return
+     */
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         if (Math.abs(velocityY) < Math.abs(velocityX)) {
@@ -89,6 +146,11 @@ public class FaceTouchSensor2 extends SimpleOnGestureListener {
         return false;
     }
 
+    /**
+     * 
+     * @param indexIn
+     * @param indexOut
+     */
     public void playMovingLeft(int indexIn, int indexOut) {
         aniListener.indexIn = indexIn;
         aniListener.indexOut = indexOut;
@@ -97,6 +159,11 @@ public class FaceTouchSensor2 extends SimpleOnGestureListener {
         faceFlipper.showNext();
     }
 
+    /**
+     * 
+     * @param indexIn
+     * @param indexOut
+     */
     public void playMovingRight(int indexIn, int indexOut) {
         aniListener.indexIn = indexIn;
         aniListener.indexOut = indexOut;

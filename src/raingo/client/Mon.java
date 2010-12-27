@@ -4,6 +4,7 @@
  */
 package raingo.client;
 
+import android.util.Log;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -13,32 +14,67 @@ import java.net.URLEncoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- *
+ * HTTP連線物件，用來擷取網頁的回傳結果，可用在取得JSON字串或網頁HTML的時候，支援POST。
  * @author Rovers
  */
 public class Mon {
 
+    /**
+     * 
+     */
     protected String uri;
+    /**
+     * 
+     */
     protected HashMap<String, String> param;
 
+    /**
+     * 
+     * @param uri 欲擷取資料的URL
+     */
     public Mon(String uri) {
         this.uri = uri;
         param = new HashMap<String, String>();
     }
 
+    /**
+     * 新增一組傳輸參數
+     * @param key 參數的名字
+     * @param value 參數值
+     * @return Mon物件本身，方便串接
+     */
     public Mon put(String key, String value) {
         param.put(key, value);
         return this;
     }
 
+    /**
+     * 開始連線傳輸，並將結果JSON文字包成JSONObject回傳
+     * @return server端回傳的JSON文字所包裝成的JSONObject
+     * @throws JSONException
+     */
     public JSONObject sendAndWrap() throws JSONException {
         return new JSONObject(send());
     }
 
+    /**
+     * 開始連線傳輸，並將結果JSON文字包成JSONArray回傳
+     * @return server端回傳的JSON文字所包裝成的JSONArray
+     * @throws JSONException
+     */
+    public JSONArray sendAndWrapArray() throws JSONException {
+        return new JSONArray(send());
+    }
+
+    /**
+     * 開始連線傳輸
+     * @return server端回應的字串傳回
+     */
     public String send() {
         try {
             URL url = new URL(uri);
@@ -70,7 +106,7 @@ public class Mon {
             if (HttpURLConnection.HTTP_OK == responseCode) {//连接成功
 
                 //当正确响应时处理数据
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 String readLine;
                 BufferedReader responseReader;
                 //处理响应流，必须与服务器响应流输出的编码一致
@@ -81,14 +117,18 @@ public class Mon {
                 responseReader.close();
                 return sb.toString().trim();
             } else {
-                return "{msg:\"NG\",code:" + responseCode + "}";
+                return "{\"msg\":\"Mon connect fail\",\"code\":" + responseCode + "}";
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Log.e("grandroid", ex.toString());
             return "{msg:\"" + ex.toString() + "\"}";
         }
     }
 
+    /**
+     * 
+     * @param args
+     */
     public static void main(String[] args) {
         //Mon mon = new Mon("http://www.dingschool.com/raingo");
         //System.out.println(mon.put("col", "test").put("act", "+").put("json", "{\"target\":[\"ruby\",\"楊峻武\"],\"count\":2}").send());

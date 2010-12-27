@@ -14,13 +14,22 @@ import java.util.TimerTask;
  */
 public abstract class TimerService extends BasicService {
 
+    /**
+     * 
+     */
     protected Timer timer;
 
+    /**
+     * 
+     */
     public TimerService() {
         super();
 
     }
 
+    /**
+     * 
+     */
     @Override
     public void onCreate() {
         super.onCreate();
@@ -33,6 +42,11 @@ public abstract class TimerService extends BasicService {
         }, 0l, getServiceInterval());
     }
 
+    /**
+     * 
+     * @param intent
+     * @param startId
+     */
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
@@ -48,6 +62,9 @@ public abstract class TimerService extends BasicService {
         }, 0l, getServiceInterval());
     }
 
+    /**
+     * 
+     */
     @Override
     public void onDestroy() {
         if (timer != null) {
@@ -56,7 +73,15 @@ public abstract class TimerService extends BasicService {
         super.onDestroy();
     }
 
+    /**
+     * 
+     * @return
+     */
     protected abstract long getServiceInterval();
 
+    /**
+     * 
+     * @return
+     */
     protected abstract boolean execute();
 }

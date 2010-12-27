@@ -14,5 +14,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Table {
+    /**
+     * 
+     * @return
+     */
     String value() default "app";//value=""
 }

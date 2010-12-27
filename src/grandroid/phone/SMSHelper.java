@@ -15,8 +15,17 @@ import android.telephony.gsm.SmsMessage;
  */
 public class SMSHelper {
 
+    /**
+     * 
+     */
     public static final String SMS_REC = "android.provider.Telephony.SMS_RECEIVED";
 
+    /**
+     * 
+     * @param context
+     * @param intent
+     * @return
+     */
     public String retrieveSMS(Context context, Intent intent) {
         StringBuilder sb = new StringBuilder();
         Bundle bundle = intent.getExtras();

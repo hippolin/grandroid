@@ -4,10 +4,46 @@ import android.database.Cursor;
 import android.util.Log;
 import java.util.Date;
 
+/**
+ * 
+ * @author Rovers
+ */
 public enum TypeMapping {
 
-    BOOLEAN, INT, DOUBLE, FLOAT, LONG, STRING, DATETIME;
+    /**
+     * 
+     */
+    BOOLEAN,
+    /**
+     * 
+     */
+    INT,
+    /**
+     * 
+     */
+    DOUBLE,
+    /**
+     * 
+     */
+    FLOAT,
+    /**
+     * 
+     */
+    LONG,
+    /**
+     * 
+     */
+    STRING,
+    /**
+     * 
+     */
+    DATETIME;
 
+    /**
+     * 
+     * @param typeClass
+     * @return
+     */
     public static TypeMapping getType(Class typeClass) {
         if (typeClass == int.class || typeClass == Integer.class) {
             return INT;
@@ -26,11 +62,22 @@ public enum TypeMapping {
         }
     }
 
+    /**
+     * 
+     * @param cursor
+     * @param fieldName
+     * @return
+     */
     public Object getResultSetValue(Cursor cursor, String fieldName) {
         int index = cursor.getColumnIndex(fieldName);
         return index >= 0 ? getResultSetValue(cursor, index) : null;
     }
 
+    /**
+     * 
+     * @param value
+     * @return
+     */
     public Object envalue(Object value) {
         if (value.getClass() == Date.class) {
             return ((Date) value).getTime();
@@ -41,6 +88,12 @@ public enum TypeMapping {
         return value;
     }
 
+    /**
+     * 
+     * @param cursor
+     * @param index
+     * @return
+     */
     public Object getResultSetValue(Cursor cursor, int index) {
         try {
             switch (this) {
@@ -65,6 +118,10 @@ public enum TypeMapping {
         return null;
     }
 
+    /**
+     * 
+     * @return
+     */
     public String getSqlType() {
         switch (this) {
             case BOOLEAN:

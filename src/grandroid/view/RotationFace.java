@@ -12,16 +12,32 @@ import android.widget.LinearLayout;
 import grandroid.action.GoAction;
 
 /**
- *
+ * 提供旋轉特效的Face
  * @author Rovers
  */
 public abstract class RotationFace extends Face {
 
+    /**
+     * 
+     */
     protected ViewGroup faceGroup;
+    /**
+     * 
+     */
     protected LinearLayout activeLayout;
+    /**
+     * 
+     */
     protected LinearLayout fakeLayout;
+    /**
+     * 
+     */
     protected Class nextFrameClass;
 
+    /**
+     * 禁止覆寫onCreate，使用RotationFace應覆寫initLayout()及updateFakeLayout()
+     * @param savedInstanceState
+     */
     @Override
     protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,30 +59,64 @@ public abstract class RotationFace extends Face {
         faceGroup.setPersistentDrawingCache(ViewGroup.PERSISTENT_ANIMATION_CACHE);
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getActiveLayoutResource() {
         return -1;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getFakeLayoutResource() {
         return -1;
     }
 
+    /**
+     * 初始化真正互動的Layout
+     * @param bundle
+     * @param activeLayout
+     */
     public abstract void initLayout(Bundle bundle, LinearLayout activeLayout);
 
+    /**
+     * 一般應覆寫此函數，通常在gotoFace()執行後被叫用
+     * @param bundle
+     * @param fakeLayout 由prepareFakeLayout()所產生的假畫面Layout
+     */
     public void updateFakeLayout(Bundle bundle, LinearLayout fakeLayout) {
     }
 
+    /**
+     * gotoFace執行後，在跳去別的Class之前被呼叫，一般不需覆寫此方法
+     * @return 回傳false則會中斷操作，預設總是回傳true
+     */
     public boolean beforeFaceChange() {
         return true;
     }
 
+    /**
+     * gotoFace執行後，在動畫播放完後被呼叫，一般不需覆寫此方法
+     */
     public void afterFaceChange() {
     }
 
+    /**
+     * 讓app跳到Class c所指定的頁面
+     * @param c
+     */
     public void gotoFace(Class<? extends Face> c) {
         gotoFace(c, true);
     }
 
+    /**
+     * 讓app跳到Class c所指定的頁面
+     * @param c
+     * @param updateLayout
+     */
     public void gotoFace(Class<? extends Face> c, boolean updateLayout) {
         if (beforeFaceChange()) {
             if (updateLayout) {
@@ -77,6 +127,10 @@ public abstract class RotationFace extends Face {
         }
     }
 
+    /**
+     * 產生假畫面Layout，一般不需覆寫此方法
+     * @return 空的LinearLayout或來自xml定義的LinearLayout
+     */
     public LinearLayout prepareFakeLayout() {
         if (fakeLayout != null) {
             faceGroup.removeView(fakeLayout);
@@ -93,13 +147,20 @@ public abstract class RotationFace extends Face {
         return fakeLayout;
     }
 
-    void changeFrame() {
+    
+    /**
+     * 不提供開發者叫用
+     */
+    public void changeFrame() {
         if (nextFrameClass != null) {
             new GoAction(this, "", nextFrameClass).execute();
             nextFrameClass = null;
         }
     }
 
+    /**
+     * 
+     */
     @Override
     protected void onResume() {
         super.onResume();

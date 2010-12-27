@@ -11,18 +11,45 @@ import android.widget.LinearLayout;
 import java.util.List;
 
 /**
- *
+ * 繼承自Face，提供陣列化Face的功能，達到動態內容呈現
+ * 基本原理為，永遠有一個假頁面與真頁面(即真正可操作使用的頁面)
+ * 建議改使用ArrayPart物件，不建議再使用本類別
+ * @param <T> 
  * @author Rovers
+ * @deprecated 
  */
+@Deprecated
 public abstract class ArrayFace<T> extends Face {
 
+    /**
+     * 
+     */
     protected FaceTouchSensor2 touchSensor;
+    /**
+     * 
+     */
     protected int index;
+    /**
+     * 
+     */
     protected boolean cycle;
+    /**
+     * 
+     */
     protected boolean touchable;
+    /**
+     * 
+     */
     protected List<T> dataObjects;
+    /**
+     * 
+     */
     protected View.OnTouchListener gestureListener;
 
+    /**
+     * 
+     * @param savedInstanceState
+     */
     @Override
     protected final void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +77,11 @@ public abstract class ArrayFace<T> extends Face {
         initLayout(savedInstanceState, touchSensor.getActiveLayout(), touchSensor.getFakeLayout());
     }
 
+    /**
+     * 
+     * @param me
+     * @return
+     */
     @Override
     public boolean onTouchEvent(MotionEvent me) {
         System.out.println(me.toString());
@@ -57,6 +89,9 @@ public abstract class ArrayFace<T> extends Face {
         return super.onTouchEvent(me);
     }
 
+    /**
+     * 
+     */
     public final void next() {
         if (canNext()) {
             int newIndex = index >= dataObjects.size() - 1 ? 0 : index + 1;
@@ -68,6 +103,10 @@ public abstract class ArrayFace<T> extends Face {
         }
     }
 
+    /**
+     * 
+     * @param newIndex
+     */
     public final void next(int newIndex) {
         boolean confirm = beforeFaceChange(newIndex, index);
         if (confirm) {
@@ -76,6 +115,9 @@ public abstract class ArrayFace<T> extends Face {
         }
     }
 
+    /**
+     * 
+     */
     public final void previous() {
         if (canPrevious()) {
             int newIndex = index <= 0 ? dataObjects.size() - 1 : index - 1;
@@ -87,6 +129,10 @@ public abstract class ArrayFace<T> extends Face {
         }
     }
 
+    /**
+     * 
+     * @param newIndex
+     */
     public final void previous(int newIndex) {
         boolean confirm = beforeFaceChange(newIndex, index);
         if (confirm) {
@@ -95,63 +141,129 @@ public abstract class ArrayFace<T> extends Face {
         }
     }
 
+    /**
+     * 
+     */
     public final void nextFirst() {
         if (dataObjects.size() > 0) {
             next(0);
         }
     }
 
+    /**
+     * 
+     */
     public final void nextLast() {
         if (dataObjects.size() > 0) {
             next(dataObjects.size() - 1);
         }
     }
 
+    /**
+     * 
+     */
     public final void update() {
         dataObjects = loadArray();
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean canNext() {
         return cycle || index < dataObjects.size() - 1;
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean canPrevious() {
         return cycle || index > 0;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getActiveLayoutResource() {
         return -1;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getFakeLayoutResource() {
         return -1;
     }
 
+    /**
+     * 
+     * @return
+     */
     protected abstract int[] getAnimationArray();
 
+    /**
+     * 
+     * @param savedInstanceState
+     * @param activeLayout
+     * @param fakeLayout
+     */
     public abstract void initLayout(Bundle savedInstanceState, LinearLayout activeLayout, LinearLayout fakeLayout);
 
+    /**
+     * 
+     * @return
+     */
     public abstract List<T> loadArray();
 
+    /**
+     * 
+     * @param indexIn
+     * @param indexOut
+     * @return
+     */
     public boolean beforeFaceChange(int indexIn, int indexOut) {
         return true;
     }
 
+    /**
+     * 
+     * @param indexIn
+     * @param indexOut
+     */
     public void afterFaceChange(int indexIn, int indexOut) {
     }
 
+    /**
+     * 
+     * @return
+     */
     public boolean isCycle() {
         return cycle;
     }
 
+    /**
+     * 
+     * @param cycle
+     */
     public void setCycle(boolean cycle) {
         this.cycle = cycle;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getIndex() {
         return index;
     }
 
+    /**
+     * 
+     * @return
+     */
     public T getCurrentData() {
         return dataObjects.get(index);
     }
@@ -160,10 +272,18 @@ public abstract class ArrayFace<T> extends Face {
         this.index = index;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getSize() {
         return dataObjects.size();
     }
 
+    /**
+     * 
+     * @param me
+     */
     public void onLongPress(MotionEvent me) {
     }
 }

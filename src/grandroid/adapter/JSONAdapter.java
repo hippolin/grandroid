@@ -23,14 +23,29 @@ import org.json.JSONObject;
  */
 public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject> {
 
+    /**
+     * 
+     */
     protected Context context;
+    /**
+     * 
+     */
     protected JSONArray array;
 
+    /**
+     * 
+     * @param context
+     * @param array
+     */
     public JSONAdapter(Context context, JSONArray array) {
         this.context = context;
         this.array = array;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getCount() {
         if (array != null) {
             return array.length();
@@ -39,6 +54,11 @@ public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject
         }
     }
 
+    /**
+     * 
+     * @param index
+     * @return
+     */
     public Object getItem(int index) {
         if (array != null) {
             try {
@@ -50,10 +70,22 @@ public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject
         return null;
     }
 
+    /**
+     * 
+     * @param index
+     * @return
+     */
     public long getItemId(int index) {
         return index;
     }
 
+    /**
+     * 
+     * @param index
+     * @param cellRenderer
+     * @param parent
+     * @return
+     */
     public View getView(int index, View cellRenderer, ViewGroup parent) {
         try {
             JSONObject obj = array.getJSONObject(index);
@@ -69,6 +101,12 @@ public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject
         return cellRenderer;
     }
 
+    /**
+     * 
+     * @param index
+     * @param item
+     * @return
+     */
     public View createRowView(int index, JSONObject item) {
         TextView cellRendererView = new TextView(context);
 
@@ -79,10 +117,23 @@ public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject
         return cellRendererView;
     }
 
+    /**
+     * 
+     * @param index
+     * @param cellRenderer
+     * @param item
+     * @throws JSONException
+     */
     public void fillRowView(int index, View cellRenderer, JSONObject item) throws JSONException {
         ((TextView) cellRenderer).setText(item.getString("name"));
     }
 
+    /**
+     * 
+     * @param index
+     * @param view
+     * @param item
+     */
     public void onClickItem(int index, View view, JSONObject item) {
         Toast.makeText(context, "not override method 'onClickItem' at JSONAdapter instance yet!", Toast.LENGTH_LONG).show();
     }

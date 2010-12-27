@@ -143,6 +143,7 @@ public class UserUtil {
      * 取得使用者所有的帳號/id，可指定需包含什麼文字，如傳"@"可取得所有email
      * 需Android SDK 2.0以上
      * @param context
+     * @param prefKey 
      * @param contains
      * @return
      */
@@ -180,6 +181,11 @@ public class UserUtil {
         return list.size() == 0 ? null : list;
     }
 
+    /**
+     * 
+     * @param list
+     * @return
+     */
     public static String getArrayString(List<String> list) {
         StringBuilder sb = new StringBuilder();
         if (list != null) {
@@ -194,6 +200,11 @@ public class UserUtil {
         return sb.toString();
     }
 
+    /**
+     * 
+     * @param context
+     * @return
+     */
     public static List<Contact> getContactEmails(Context context) {
         ArrayList<Contact> list = new ArrayList<Contact>();
         String emailProjection[] = new String[]{Contacts.Phones.PERSON_ID, Contacts.Phones.DISPLAY_NAME, Contacts.ContactMethods.KIND, Contacts.ContactMethods.DATA};
@@ -221,6 +232,14 @@ public class UserUtil {
         return list;
     }
 
+    /**
+     * 
+     * @param context
+     * @param email
+     * @param subject
+     * @param body
+     * @return
+     */
     public static boolean mailTo(Context context, String[] email, String subject, String body) {
         Intent it = new Intent(Intent.ACTION_SEND);
         it.putExtra(Intent.EXTRA_EMAIL, email);
