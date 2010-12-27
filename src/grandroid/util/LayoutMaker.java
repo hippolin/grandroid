@@ -282,8 +282,8 @@ public class LayoutMaker {
      * @param adapter 清單所使用的adapter，若該adapter實作了ItemClickable介面，則按下item會執行adapter的onItemClick事件
      * @return 生成的物件
      */
-    public ListView createListView(final BaseAdapter adapter) {
-        ListView lv = new ListView(context);
+    public ListView createListView(BaseAdapter adapter) {
+        final ListView lv = new ListView(context);
         lv.setBackgroundColor(Color.WHITE);
         lv.setCacheColorHint(Color.WHITE);
         lv.setAdapter(adapter);
@@ -292,7 +292,7 @@ public class LayoutMaker {
             lv.setOnItemClickListener(new OnItemClickListener()                {
 
                 public void onItemClick(AdapterView<?> parent, View view, int index, long arg3) {
-                    ((ItemClickable) adapter).onClickItem(index, view, adapter.getItem(index));
+                    ((ItemClickable) lv.getAdapter()).onClickItem(index, view, lv.getAdapter().getItem(index));
                 }
             });
         }
