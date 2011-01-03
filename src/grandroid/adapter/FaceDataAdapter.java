@@ -22,6 +22,8 @@ public abstract class FaceDataAdapter<T extends Identifiable> extends ObjectAdap
      * 
      */
     protected GenericHelper<T> helper;
+    protected String where;
+    protected boolean available = false;
 
     /**
      * 
@@ -31,14 +33,35 @@ public abstract class FaceDataAdapter<T extends Identifiable> extends ObjectAdap
     public FaceDataAdapter(Context context, GenericHelper<T> helper) {
         super(context, helper.select());
         this.helper = helper;
+        available = true;
+    }
+
+    public FaceDataAdapter(Context context, GenericHelper<T> helper, String where, boolean ignoreFirstRefresh) {
+        super(context, helper.select(where));
+        this.where = where;
+        this.helper = helper;
+        available=!ignoreFirstRefresh;
     }
 
     /**
      * 
      */
     public void refresh() {
-        list = helper.select();
-        this.notifyDataSetChanged();
+        if (available) {
+            if (where != null && where.length() > 0) {
+                list = helper.select(where);
+            } else {
+                list = helper.select();
+            }
+            this.notifyDataSetChanged();
+        }else{
+            available=true;
+        }
+    }
+
+    public void requery(String where) {
+        this.where = where;
+        refresh();
     }
 
     /**

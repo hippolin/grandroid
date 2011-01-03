@@ -20,7 +20,7 @@ public abstract class DialogMask {
     protected GDialog dialog;
     protected Context context;
     protected GDialog.Builder builder;
-    
+
     public DialogMask(Context context) {
         this.context = context;
         builder = new GDialog.Builder(context);
@@ -28,14 +28,14 @@ public abstract class DialogMask {
 
     public abstract boolean setupMask(Context context, GDialog.Builder builder, LayoutMaker maker) throws Exception;
 
-    public GDialog getDialog(){
+    public GDialog getDialog() {
         return dialog;
     }
-    
-    public boolean isShowing(){
+
+    public boolean isShowing() {
         return dialog.isShowing();
     }
-    
+
     public void show() {
         try {
             LayoutMaker maker = new LayoutMaker(context, false);
@@ -47,9 +47,13 @@ public abstract class DialogMask {
             Log.e(DialogMask.class.getName(), null, ex);
         }
     }
-    
-    protected LinearLayout.LayoutParams getMaxSizeLayoutParams(){
+
+    protected LinearLayout.LayoutParams getMaxSizeLayoutParams() {
+        return getMaxSizeLayoutParams(0);
+    }
+
+    protected LinearLayout.LayoutParams getMaxSizeLayoutParams(int minus) {
         LayoutUtil lu = new LayoutUtil((Activity) context);
-        return new LinearLayout.LayoutParams(lu.getWidth() - 60, (int) (0.8 * lu.getHeight()));
+        return new LinearLayout.LayoutParams(lu.getWidth() - 60, lu.getHeight() - 80 - minus);
     }
 }

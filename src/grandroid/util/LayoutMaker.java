@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -218,6 +219,7 @@ public class LayoutMaker {
             return null;
         }
     }
+
     /**
      * 使用網路上的圖片產生一個影像按鈕
      * @param <T> 需要產生影像物件的類別，一般為ImageView.class或ImageButton.class
@@ -236,6 +238,7 @@ public class LayoutMaker {
             return null;
         }
     }
+
     /**
      * 產生一個圖片按鈕，並加入到"目前Layout"
      * 加入Layout時的參數：當"目前Layout"的Orientation橫向時為layWW(1)；其他狀況為layWW(0)
@@ -245,7 +248,7 @@ public class LayoutMaker {
      * @return 生成的物件
      */
     public <T extends ImageView> T addImage(Class<T> viewClass, int resourceID) {
-        T iv = createImage(viewClass,resourceID);
+        T iv = createImage(viewClass, resourceID);
         lastLayout.addView(iv, layWW(lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL ? 1 : 0));
         return iv;
     }
@@ -259,16 +262,16 @@ public class LayoutMaker {
      * @return 生成的物件
      */
     public <T extends ImageView> T addImage(Class<T> viewClass, String uri) {
-        T iv = createImage(viewClass,uri);
+        T iv = createImage(viewClass, uri);
         lastLayout.addView(iv, layWW(lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL ? 1 : 0));
         return iv;
     }
 
-    public RadioGroup createRadioGroup(String[] btnTexts){
+    public RadioGroup createRadioGroup(String[] btnTexts) {
         RadioGroup rg = new RadioGroup(context);
-        RadioButton[] rbs= new RadioButton[btnTexts.length];
-        for(int i=0;i<rbs.length;i++){
-            rbs[i]=new RadioButton(context);
+        RadioButton[] rbs = new RadioButton[btnTexts.length];
+        for (int i = 0; i < rbs.length; i++) {
+            rbs[i] = new RadioButton(context);
             rbs[i].setText(btnTexts[i]);
             rbs[i].setTextSize(16);
             rbs[i].setTextColor(Color.BLACK);
@@ -276,7 +279,27 @@ public class LayoutMaker {
         }
         return rg;
     }
-    
+
+    public CheckBox createCheckBox(boolean checked) {
+        CheckBox cb = new CheckBox(context);
+        cb.setChecked(checked);
+        return cb;
+
+    }
+
+    public CheckBox addCheckBox(boolean checked) {
+        CheckBox cb = createCheckBox(checked);
+        lastLayout.addView(cb);
+        return cb;
+    }
+
+    public CheckBox addCheckBox(boolean checked, String text) {
+        CheckBox cb = createCheckBox(checked);
+        lastLayout.addView(cb);
+        addTextView(text);
+        return cb;
+    }
+
     /**
      * 以傳入的Adapter產生一個清單
      * @param adapter 清單所使用的adapter，若該adapter實作了ItemClickable介面，則按下item會執行adapter的onItemClick事件
@@ -287,9 +310,8 @@ public class LayoutMaker {
         lv.setBackgroundColor(Color.WHITE);
         lv.setCacheColorHint(Color.WHITE);
         lv.setAdapter(adapter);
-
         if (ItemClickable.class.isInstance(adapter)) {
-            lv.setOnItemClickListener(new OnItemClickListener()                {
+            lv.setOnItemClickListener(new OnItemClickListener()  {
 
                 public void onItemClick(AdapterView<?> parent, View view, int index, long arg3) {
                     ((ItemClickable) lv.getAdapter()).onClickItem(index, view, lv.getAdapter().getItem(index));
@@ -567,6 +589,24 @@ public class LayoutMaker {
      */
     public ViewGroup styliseBackground(int resourceID) {
         lastLayout.setBackgroundResource(resourceID);
+        return lastLayout;
+    }
+
+    public ViewGroup styliseParams(LinearLayout.LayoutParams params) {
+        ViewGroup hostParent = getParentOfLastLayout();
+        ViewGroup parent = (ViewGroup) lastLayout.getParent();
+        if (hostParent == parent) {
+            parent.removeView(lastLayout);
+            parent.addView(lastLayout, params);
+        } else {
+            for (int i = 0; i < hostParent.getChildCount(); i++) {
+                if (hostParent.getChildAt(i) == parent) {
+                    hostParent.removeViewAt(i);
+                    hostParent.addView(parent, i, params);
+                    break;
+                }
+            }
+        }
         return lastLayout;
     }
 
