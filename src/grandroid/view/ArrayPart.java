@@ -7,6 +7,7 @@ package grandroid.view;
 import android.content.Context;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 import grandroid.anim.AnimationEventHandler;
 import grandroid.anim.FlipperController;
 import java.util.List;
@@ -63,6 +64,10 @@ public class ArrayPart<T> implements AnimationEventHandler {
      */
     protected View.OnTouchListener gestureListener;
 
+    public ArrayPart(Context context, int[] animArray, ArrayPartListener partListener) {
+        this(context, animArray, new LinearLayout(context), new LinearLayout(context), partListener);
+    }
+
     /**
      * 傳入一個真實的view/layout，以及一個假的view/layout，建立ArrayPart實體
      * @param context
@@ -114,6 +119,14 @@ public class ArrayPart<T> implements AnimationEventHandler {
      */
     public View getView() {
         return flipperController.getViewFlipper();
+    }
+
+    public View getActiveView() {
+        return flipperController.getActiveView();
+    }
+
+    public View getFakeView() {
+        return flipperController.getFakeView();
     }
 
     /**
@@ -312,7 +325,7 @@ public class ArrayPart<T> implements AnimationEventHandler {
      * 不應覆寫
      * @return
      */
-    public List<T> getDataObjects(){
+    public List<T> getDataObjects() {
         return this.dataObjects;
     }
 }

@@ -21,6 +21,14 @@ public abstract class InputDialogMask extends DialogMask {
     protected String captionText;
     protected String titleText;
 
+    /**
+     * 欲使用本物件，請於字串資源檔中設定 grand_btn_yes 與 grand_btn_cancel 兩個字串，分別代表「確定」與「取消」
+     * @param context
+     * @param titleText
+     * @param defaultText
+     * @param hintText
+     * @param captionText
+     */
     public InputDialogMask(Context context, String titleText, String defaultText, String hintText, String captionText) {
         super(context);
         this.titleText = titleText;

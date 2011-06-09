@@ -5,8 +5,10 @@
 package grandroid.util;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.util.DisplayMetrics;
-import android.view.View;
+import android.util.Log;
+import android.view.Window;
 
 /**
  *
@@ -22,17 +24,34 @@ public class LayoutUtil {
      * 
      */
     protected int height;
+    protected DisplayMetrics metrics;
+    protected boolean statusBar;
+    protected boolean titleBar;
+    protected boolean compatibleMode;
+    protected int softSpace;
+    protected int rigidSpace;
+    protected int excluseSpace;
+    protected int cumulatePadding;
 
     /**
-     * 
-     * @param frame
+     * default setting: statusBar=true, titleBar=false, compatibleMode=true;
+     * @param activity
      */
-    public LayoutUtil(Activity frame) {
-        DisplayMetrics metrics = new DisplayMetrics();
+    public LayoutUtil(Activity activity) {
+        this(activity, true, false, true);
+    }
+
+    public LayoutUtil(Activity frame, boolean statusBar, boolean titleBar, boolean compatibleMode) {
+        this.statusBar = statusBar;
+        this.titleBar = titleBar;
+        this.compatibleMode = compatibleMode;
+        metrics = new DisplayMetrics();
         frame.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
         width = metrics.widthPixels;
         height = metrics.heightPixels;
+
+        //Log.d("grandroid", "titleBarHeight = " + titleBarHeight);
     }
 
     /**
@@ -49,6 +68,14 @@ public class LayoutUtil {
      */
     public int getWidth() {
         return width;
+    }
+
+    public int getRealHeight() {
+        return Math.round(metrics.heightPixels * metrics.density);
+    }
+
+    public int getRealWidth() {
+        return Math.round(metrics.widthPixels * metrics.density);
     }
 
     /**
@@ -81,5 +108,60 @@ public class LayoutUtil {
             }
         }
         return result;
+    }
+
+    public int getExcluseSpace() {
+        return excluseSpace;
+    }
+
+    public void setExcluseSpace(int excluseSpace) {
+        this.excluseSpace = excluseSpace;
+    }
+
+    public int predictAvailableSpaceHeight(int fullHeight) {
+        int contentHeight = 0;
+        contentHeight = fullHeight;
+        if (statusBar) {
+            if (compatibleMode) {
+                contentHeight -= 25;
+            } else {
+                if (fullHeight <= 360) {
+                    contentHeight -= 19;
+                } else if (fullHeight <= 480) {
+                    contentHeight -= 25;
+                } else {
+                    contentHeight -= 38;
+                }
+            }
+        }
+        if (titleBar) {
+            //未實測
+            contentHeight -= 38;
+        }
+        return contentHeight;
+    }
+
+    public int correctPadding(int paddingWhenY800) {
+        return correctPadding(paddingWhenY800, 0);
+    }
+
+    public int correctPadding(int paddingWhenY800, int extraMinusForSmallScreen) {
+        if (height > 480) {
+            extraMinusForSmallScreen = 0;
+        }
+        if (compatibleMode) {
+            return Math.max(Math.round(paddingWhenY800 * ((float) predictAvailableSpaceHeight(height) - excluseSpace) / (predictAvailableSpaceHeight(533) - excluseSpace)) - extraMinusForSmallScreen, 0);
+        } else {
+            if (height == 800) {
+                return paddingWhenY800;
+            } else {
+                float paddingScale = (480f / width) * ((float) predictAvailableSpaceHeight(height) - excluseSpace) / (predictAvailableSpaceHeight(800) - excluseSpace);
+                return Math.max(Math.round(paddingWhenY800 * paddingScale), 0);
+            }
+        }
+    }
+
+    public int fixPadding(int paddingWhenY800, int deltaRigid) {
+        return correctPadding(paddingWhenY800, deltaRigid - correctPadding(deltaRigid));
     }
 }

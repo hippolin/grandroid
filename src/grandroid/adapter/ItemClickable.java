@@ -20,4 +20,5 @@ public interface ItemClickable<T> {
      * @param item
      */
     public void onClickItem(int index, View view,T item);
+    public void onLongPressItem(int index, View view,T item);
 }

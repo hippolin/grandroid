@@ -4,11 +4,11 @@
  */
 package grandroid.action;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import grandroid.DataAgent;
 
 /**
  *
@@ -24,6 +24,19 @@ public class GoAction extends ContextAction {
      * 
      */
     protected int flag = -1;
+    protected boolean isSubTask;
+    protected Class c;
+    protected int requestCode = 0;
+
+    /**
+     * 
+     * @param context
+     * @param c target activity
+     */
+    public GoAction(Context context, Class c) {
+        super(context, "undefined");
+        this.c = c;
+    }
 
     /**
      * 
@@ -33,13 +46,11 @@ public class GoAction extends ContextAction {
      */
     public GoAction(Context context, String actionName, String cp) {
         super(context, actionName);
-        Class c = null;
         try {
             c = Class.forName(cp);
         } catch (ClassNotFoundException ex) {
             Log.e(GoAction.class.getName(), null, ex);
         }
-        this.args = new Object[]{c};
     }
 
     /**
@@ -50,7 +61,7 @@ public class GoAction extends ContextAction {
      */
     public GoAction(Context context, String actionName, Class c) {
         super(context, actionName);
-        this.args = new Object[]{c};
+        this.c = c;
     }
 
     /**
@@ -137,6 +148,16 @@ public class GoAction extends ContextAction {
         return setFlag(Intent.FLAG_ACTIVITY_NO_HISTORY);
     }
 
+    public GoAction setSubTask() {
+        return setSubTask(0);
+    }
+
+    public GoAction setSubTask(int requestCode) {
+        isSubTask = true;
+        this.requestCode = requestCode;
+        return this;
+    }
+
     /**
      * 
      * @param context
@@ -144,20 +165,22 @@ public class GoAction extends ContextAction {
      */
     @Override
     public boolean execute(Context context) {
-
-        if (context != null && args.length > 0 && args[0] instanceof Class) {
+        if (context != null && c != null) {
             Intent intent = new Intent();
-            intent.setClass(context, (Class) args[0]);
+            intent.setClass(context, c);
             if (bundle != null) {
                 intent.putExtras(bundle);
             }
             if (flag > 0) {
                 intent.setFlags(flag);
             }
-            context.startActivity(intent);
+            if (isSubTask && context instanceof Activity) {
+                ((Activity) context).startActivityForResult(intent, requestCode);
+            } else {
+                context.startActivity(intent);
+            }
             return true;
         }
-
         return false;
     }
 }

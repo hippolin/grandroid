@@ -11,7 +11,7 @@ package grandroid;
 public class AppStatus {
 
     /**
-     * 記錄目前的app是否已被結束，請勿修改此變數，請使用FinishAction來進行結束app的工作
+     * 記錄目前app是否正顯示中
      */
-    public static boolean FIHISHED = false;
+    public static boolean ON_TOP = false;
 }

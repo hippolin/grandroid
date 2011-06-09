@@ -4,6 +4,7 @@
  */
 package grandroid.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import com.facebook.util.SessionEvents.AuthListener;
 import facepaper.api.FacebookAgent;
@@ -37,13 +38,13 @@ public abstract class BookFace extends Face {
      * @param getUserData
      */
     public void loginFacebook(final ContextAction successAction, final ContextAction failAction, final boolean getUserData) {
-        agent.login(new AuthListener() {
+        agent.login(new AuthListener()    {
 
             public void onAuthSucceed() {
+                if (getUserData) {
+                    agent.getProfile();
+                }
                 if (successAction != null) {
-                    if (getUserData) {
-                        agent.getProfile();
-                    }
                     successAction.execute(BookFace.this);
                 }
             }
@@ -62,6 +63,7 @@ public abstract class BookFace extends Face {
     public void logoutFacebook() {
         agent.logout();
     }
+
     /**
      * 
      * @return
@@ -73,4 +75,10 @@ public abstract class BookFace extends Face {
      * @return
      */
     protected abstract int getFacebookIcon();
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        agent.authorizeCallback(requestCode, resultCode, data);
+    }
 }

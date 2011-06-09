@@ -5,26 +5,15 @@
 package grandroid.view;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import grandroid.AppStatus;
 import grandroid.MessageReceiver;
 import grandroid.DataAgent;
@@ -33,10 +22,9 @@ import grandroid.action.AlertAction;
 import grandroid.action.ContextAction;
 import grandroid.action.NotifyAction;
 import grandroid.action.ToastAction;
-import grandroid.adapter.ItemClickable;
-import grandroid.util.ImageUtil;
+import grandroid.dialog.CommandPickModel;
+import grandroid.dialog.DateTimePickModel;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 /**
  *
@@ -60,14 +48,12 @@ public class Face extends Activity {
      * 
      */
     protected Menu menu;
-    /**
-     * 
-     */
-    protected boolean disableLock = true;
+
     /**
      * 
      */
     protected DataAgent dataAgent;
+    protected DateTimePickModel model;
 
     /**
      * 
@@ -156,7 +142,13 @@ public class Face extends Activity {
         super.onCreateOptionsMenu(menu);
         if (menuList != null) {
             for (int i = 0; i < menuList.size(); i++) {
-                menu.add(i, i, i, menuList.get(i).getActionName());
+                if (menuList.get(i).getActionName().contains(",")) {
+                    String[] menuNames = menuList.get(i).getActionName().split(",");
+                    menu.add(0, i, i, menuNames[0]);
+                    menu.getItem(i).setIcon(Integer.valueOf(menuNames[1]));
+                } else {
+                    menu.add(0, i, i, menuList.get(i).getActionName());
+                }
                 //System.out.println("menuList.get(i).getActionName()=" + menuList.get(i).getActionName());
             }
         }
@@ -242,7 +234,7 @@ public class Face extends Activity {
      * @param msg
      */
     public void notify(String title, String msg) {
-        new NotifyAction(this).setData(title, msg).execute();
+        new NotifyAction(this).setContent(title, msg).execute();
     }
 
     /**
@@ -264,7 +256,7 @@ public class Face extends Activity {
      */
     protected void setButtonEvent(View btn, final Action act) {
 
-        btn.setOnClickListener(new View.OnClickListener()          {
+        btn.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
                 act.setSrc(view);
@@ -286,19 +278,21 @@ public class Face extends Activity {
         //menuActions.put(menuItemID, act);
     }
 
+    protected void addMenu(final Action act, int icon) {
+        if (menuList == null) {
+            menuList = new ArrayList<Action>();
+        }
+        act.setActionName(act.getActionName() + "," + icon);
+        menuList.add(act);
+        //menuActions.put(menuItemID, act);
+    }
+
     /**
      * 
      */
     @Override
     protected void onRestart() {
-        if (AppStatus.FIHISHED) {
-            finish();
-        } else {
-            super.onRestart();
-            if (bundledReceiver != null) {
-                bundledReceiver.registerAllEvent(this);
-            }
-        }
+        super.onRestart();
     }
 
     /**
@@ -306,17 +300,24 @@ public class Face extends Activity {
      */
     @Override
     protected void onResume() {
-        if (AppStatus.FIHISHED) {
-            finish();
-        } else {
-            super.onResume();
+        super.onResume();
+        AppStatus.ON_TOP = true;
+        if (bundledReceiver != null) {
+            bundledReceiver.registerAllEvent(this);
+        }
 //            if (disableLock) {
 //                log("redisable Lock");
 //                KeyguardManager km = (KeyguardManager) this.getSystemService(Context.KEYGUARD_SERVICE);
 //                km.newKeyguardLock("Grandroid").disableKeyguard();
 //            }
-        }
     }
+    
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        AppStatus.ON_TOP = true;
+    }
+
 
     /**
      * 
@@ -324,6 +325,7 @@ public class Face extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        AppStatus.ON_TOP = false;
         if (dataAgent != null) {
             dataAgent.digest();
         }
@@ -361,5 +363,19 @@ public class Face extends Activity {
         if (bundledReceiver != null) {
             this.unregisterReceiver(bundledReceiver);
         }
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        return model.createDialog(this);
+    }
+
+    protected void pickDateTime(DateTimePickModel model) {
+        this.model = model;
+        showDialog(model.getMode());
+    }
+
+    public <T> void pickObject(CommandPickModel cpm) {
+        new AlertDialog.Builder(this).setItems(cpm.getStringArray(), cpm).setTitle(cpm.getTitle()).show();
     }
 }

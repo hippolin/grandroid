@@ -75,6 +75,9 @@ public class MessageReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (actionMap.containsKey(intent.getAction())) {
             Action action = actionMap.get(intent.getAction());
+            if (intent.getExtras() != null) {
+                action.setArgs(intent.getExtras());
+            }
             if (intent.getAction().equals(SMSHelper.SMS_REC)) {
                 String message = new SMSHelper().retrieveSMS(context, intent);
                 action.setArgs(message).execute();

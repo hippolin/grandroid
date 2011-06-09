@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -27,6 +28,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import grandroid.adapter.ItemClickable;
 
@@ -49,31 +51,44 @@ public class LayoutMaker {
      */
     protected int viewID = 1;
     protected Context context;
+    protected static int colorBG = Color.WHITE;
 
     public LayoutMaker(Context context) {
-        this(context, true);
-    }
-
-    public LayoutMaker(Context context, boolean setContentView) {
         this.context = context;
         LinearLayout ll = new LinearLayout(context);
-        ll.setBackgroundColor(Color.WHITE);
+
+        ll.setBackgroundColor(colorBG);
         ll.setOrientation(LinearLayout.VERTICAL);
         mainLayout = ll;
         lastLayout = ll;
-        if (setContentView && context instanceof Activity) {
-            ((Activity) context).setContentView(mainLayout);
+        ((Activity) context).setContentView(mainLayout);
+    }
+
+    public LayoutMaker(Context context, LinearLayout layout) {
+        this.context = context;
+        if (layout.getParent() == null) {
+            LinearLayout fakeRoot = new LinearLayout(context);
+            fakeRoot.setOrientation(LinearLayout.VERTICAL);
+            fakeRoot.addView(layout, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
+            this.mainLayout = fakeRoot;
+        } else {
+            this.mainLayout = layout;
         }
+        lastLayout = layout;
     }
 
     public LayoutMaker(Dialog dialog, Context context) {
         this.context = context;
         LinearLayout ll = new LinearLayout(context);
-        ll.setBackgroundColor(Color.WHITE);
+        ll.setBackgroundColor(colorBG);
         ll.setOrientation(LinearLayout.VERTICAL);
         mainLayout = ll;
         lastLayout = ll;
         dialog.setContentView(mainLayout);
+    }
+
+    public static void setBackgroundColor(int color) {
+        colorBG = color;
     }
 
     public ViewGroup getLastLayout() {
@@ -84,13 +99,23 @@ public class LayoutMaker {
         return mainLayout;
     }
 
+    public ViewGroup getRootLayout() {
+        if (mainLayout.getParent() instanceof ScrollView || mainLayout.getParent() instanceof HorizontalScrollView) {
+            return (ViewGroup) mainLayout.getParent().getParent();
+        } else if (mainLayout.getParent() instanceof LinearLayout || mainLayout.getParent() instanceof RelativeLayout) {
+            return (ViewGroup) lastLayout.getParent();
+        } else {
+            return mainLayout;
+        }
+    }
+
     /**
      * 新增一個view元件至"目前Layout"
      * 加入Layout時的參數為layWW(0)
      * @param view 任何view物件，如某種Layout、TextView、EditText、ListView或ImageView等等
      * @return view本身
      */
-    public View add(View view) {
+    public <T extends View> T add(T view) {
         lastLayout.addView(view);
         return view;
     }
@@ -101,7 +126,7 @@ public class LayoutMaker {
      * @param params 一般不需自己生成，而是使用layFF()、layFW()、layWW(0)、layWW(1)代替
      * @return view本身
      */
-    public View add(View view, LinearLayout.LayoutParams params) {
+    public <T extends View> T add(T view, LinearLayout.LayoutParams params) {
         lastLayout.addView(view, params);
         return view;
     }
@@ -152,8 +177,23 @@ public class LayoutMaker {
      * @return 生成的物件
      */
     public EditText addEditText(String text) {
+        return addEditText(text, false);
+    }
+
+    /**
+     * 產生一個文字方塊，並加入到"目前Layout"
+     * 加入Layout時的參數為layWW(0)
+     * @param text 將顯示的文字
+     * @param fillParent layout參數width是否為fillparent
+     * @return 生成的物件
+     */
+    public EditText addEditText(String text, boolean fillParent) {
         EditText et = createEditText(text);
-        lastLayout.addView(et);
+        if (fillParent) {
+            lastLayout.addView(et, layFW());
+        } else {
+            lastLayout.addView(et);
+        }
         return et;
     }
 
@@ -307,16 +347,25 @@ public class LayoutMaker {
      */
     public ListView createListView(BaseAdapter adapter) {
         final ListView lv = new ListView(context);
-        lv.setBackgroundColor(Color.WHITE);
-        lv.setCacheColorHint(Color.WHITE);
-        lv.setAdapter(adapter);
-        if (ItemClickable.class.isInstance(adapter)) {
-            lv.setOnItemClickListener(new OnItemClickListener()  {
+        lv.setBackgroundColor(colorBG);
+        lv.setCacheColorHint(colorBG);
+        if (adapter != null) {
+            lv.setAdapter(adapter);
+            if (ItemClickable.class.isInstance(adapter)) {
+                lv.setOnItemClickListener(new OnItemClickListener() {
 
-                public void onItemClick(AdapterView<?> parent, View view, int index, long arg3) {
-                    ((ItemClickable) lv.getAdapter()).onClickItem(index, view, lv.getAdapter().getItem(index));
-                }
-            });
+                    public void onItemClick(AdapterView<?> parent, View view, int index, long arg3) {
+                        ((ItemClickable) lv.getAdapter()).onClickItem(index, view, lv.getAdapter().getItem(index));
+                    }
+                });
+                lv.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int index, long arg3) {
+                        ((ItemClickable) lv.getAdapter()).onLongPressItem(index, view, lv.getAdapter().getItem(index));
+                        return true;
+                    }
+                });
+            }
         }
         return lv;
     }
@@ -346,6 +395,29 @@ public class LayoutMaker {
         return lv;
     }
 
+    public Spinner createSpinner(BaseAdapter adapter) {
+        final Spinner sp = new Spinner(context);
+        //sp.setBackgroundColor(colorBG);
+        if (adapter != null) {
+            sp.setAdapter(adapter);
+        }
+        return sp;
+    }
+
+    public Spinner addSpinner(BaseAdapter adapter, boolean fillParent) {
+        Spinner sp = createSpinner(adapter);
+        if (fillParent) {
+            lastLayout.addView(sp, layFW());
+        } else {
+            lastLayout.addView(sp);
+        }
+        return sp;
+    }
+
+    public Spinner addSpinner(BaseAdapter adapter) {
+        return addSpinner(adapter, false);
+    }
+
     /**
      * 傳回一個LayoutParams物件(W=FILL_PARENT, H=FILL_PARENT)
      * @return 生成的LinearLayout.LayoutParams物件
@@ -372,6 +444,19 @@ public class LayoutMaker {
             return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, weight);
         } else {
             return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    /**
+     * 傳回一個LayoutParams物件(W=FILL_PARENT, H=WRAP_CONTENT)
+     * @param weight 垂直方向上的權重(水平方向上已被設為填滿，故無權重)
+     * @return 生成的LinearLayout.LayoutParams物件
+     */
+    public LinearLayout.LayoutParams layWF(float weight) {
+        if (weight > 0) {
+            return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.FILL_PARENT, weight);
+        } else {
+            return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.FILL_PARENT);
         }
     }
 
@@ -405,22 +490,38 @@ public class LayoutMaker {
      * @return 生成的LinearLayout物件
      */
     public LinearLayout addRowLayout(boolean withScroll) {
+        return addRowLayout(withScroll, false);
+    }
+
+    public LinearLayout addRowLayout(boolean withScroll, boolean fullHeight) {
+        if (fullHeight) {
+            if (withScroll) {
+                return addRowLayout(withScroll, layFF());
+            } else {
+                return addRowLayout(withScroll, layWF(0));
+            }
+        } else {
+            if (lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL) {
+                return addRowLayout(withScroll, layWW(0));
+            } else {
+                return addRowLayout(withScroll, layFW());
+            }
+        }
+    }
+
+    public LinearLayout addRowLayout(boolean withScroll, LinearLayout.LayoutParams params) {
         LinearLayout ll = new LinearLayout(context);
-        //ll.setBackgroundColor(Color.WHITE);
+        //ll.setBackgroundColor(colorBG);
         ll.setOrientation(LinearLayout.HORIZONTAL);
 
         if (withScroll) {
             HorizontalScrollView sv = new HorizontalScrollView(context);
             sv.setScrollContainer(true);
             sv.setFocusable(true);
-            sv.addView(ll);
-            lastLayout.addView(sv, layFW());
+            sv.addView(ll, layFF());
+            lastLayout.addView(sv, params);
         } else {
-            if (lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL) {
-                lastLayout.addView(ll, layWW(0));
-            } else {
-                lastLayout.addView(ll, layFW());
-            }
+            lastLayout.addView(ll, params);
         }
         lastLayout = ll;
         return ll;
@@ -443,21 +544,39 @@ public class LayoutMaker {
      * @return 生成的LinearLayout物件
      */
     public LinearLayout addColLayout(boolean withScroll) {
+        return addColLayout(withScroll, false);
+    }
+
+    public LinearLayout addColLayout(boolean withScroll, boolean fullHeight) {
+        if (fullHeight) {
+            return addColLayout(withScroll, layWF(1));
+        } else {
+            if (lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL) {
+                return addColLayout(withScroll, layWW(1));
+            } else {
+                return addColLayout(withScroll, layFW(1));
+            }
+
+        }
+    }
+
+    public LinearLayout addColLayout(boolean withScroll, LinearLayout.LayoutParams params) {
         LinearLayout ll = new LinearLayout(context);
-        //ll.setBackgroundColor(Color.WHITE);
+        //ll.setBackgroundColor(colorBG);
         ll.setOrientation(LinearLayout.VERTICAL);
         if (withScroll) {
             ScrollView sv = new ScrollView(context);
             sv.setScrollContainer(true);
             sv.setFocusable(true);
-            sv.addView(ll);
-            lastLayout.addView(sv, layFW());
+            sv.addView(ll, new ScrollView.LayoutParams(ScrollView.LayoutParams.FILL_PARENT, ScrollView.LayoutParams.FILL_PARENT));
+            lastLayout.addView(sv, params);
         } else {
-            if (lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL) {
-                lastLayout.addView(ll, layWW(1));
-            } else {
-                lastLayout.addView(ll, layFW());
-            }
+            lastLayout.addView(ll, params);
+//            if (lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL) {
+//                lastLayout.addView(ll, fullHeight ? layWF(1) : layWW(1));
+//            } else {
+//                lastLayout.addView(ll, fullHeight ? layFF() : layFW(1));
+//            }
         }
         lastLayout = ll;
         return ll;
@@ -469,10 +588,19 @@ public class LayoutMaker {
      * @return 生成的LinearLayout物件
      */
     public LinearLayout addTopBanner() {
+        return addTopBanner(false);
+    }
+
+    /**
+     * 產生一個橫向的LinearLayout作為置頂的Banner，並加入進"目前Layout"，之後"目前Layout"將指向此新生成的LinearLayout
+     * 注意：不可連續呼叫，且應遵守任何一個Layout最多只能有一個TopBanner及一個BottomBanner的原則
+     * @return 生成的LinearLayout物件
+     */
+    public LinearLayout addTopBanner(boolean isFloat) {
         LinearLayout ll = new LinearLayout(context);
         ll.setOrientation(LinearLayout.HORIZONTAL);
 
-        insertTopBanner(ll);
+        insertTopBanner(ll, isFloat);
         lastLayout = ll;
         return ll;
     }
@@ -482,7 +610,7 @@ public class LayoutMaker {
      * 建議以addTopBanner()取代本方法
      * @param view
      */
-    public void insertTopBanner(View view) {
+    public void insertTopBanner(View view, boolean isFloat) {
         boolean isParentRelative = getParentOfLastLayout() instanceof RelativeLayout;
         ViewGroup parent = getParentOfLastLayout();
         parent.removeView(lastLayout);
@@ -491,20 +619,31 @@ public class LayoutMaker {
             rl = (RelativeLayout) parent;
         } else {
             rl = new RelativeLayout(context);
-            rl.setBackgroundColor(Color.WHITE);
+            //rl.setBackgroundColor(colorBG);
         }
 
-        RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        view.setId(viewID);
-        rllp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        rl.addView(view, rllp);
+        if (isFloat) {
+            if (lastLayout.getChildCount() == 0) {
+                Log.e("grandroid", "must exist at least one full_parent child in current layout while call addTopBanner(true)");
+            }
+            RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+            rl.addView(lastLayout, 0, rllpMain);
+            RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            rllp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            rl.addView(view, rllp);
+        } else {
+            RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            view.setId(viewID);
+            rllp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+            rl.addView(view, rllp);
 
-        RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
-        rllpMain.addRule(RelativeLayout.BELOW, viewID++);
-        if (rl.getChildCount() == 2) {
-            rllpMain.addRule(RelativeLayout.ABOVE, rl.getChildAt(0).getId());
+            RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+            rllpMain.addRule(RelativeLayout.BELOW, viewID++);
+            if (rl.getChildCount() == 2) {
+                rllpMain.addRule(RelativeLayout.ABOVE, rl.getChildAt(0).getId());
+            }
+            rl.addView(lastLayout, rllpMain);
         }
-        rl.addView(lastLayout, rllpMain);
         if (!isParentRelative) {
             parent.addView(rl, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
         }
@@ -516,10 +655,19 @@ public class LayoutMaker {
      * @return 生成的LinearLayout物件
      */
     public LinearLayout addBottomBanner() {
+        return addBottomBanner(false);
+    }
+
+    /**
+     * 產生一個橫向的LinearLayout作為置底的Banner，並加入進"目前Layout"，之後"目前Layout"將指向此新生成的LinearLayout
+     * 注意：不可連續呼叫，且應遵守任何一個Layout最多只能有一個TopBanner及一個BottomBanner的原則
+     * @return 生成的LinearLayout物件
+     */
+    public LinearLayout addBottomBanner(boolean isFloat) {
         LinearLayout ll = new LinearLayout(context);
         ll.setOrientation(LinearLayout.HORIZONTAL);
 
-        insertBottomBanner(ll);
+        insertBottomBanner(ll, isFloat);
         lastLayout = ll;
         return ll;
     }
@@ -529,7 +677,7 @@ public class LayoutMaker {
      * 建議以addBottomBanner()取代本方法
      * @param view
      */
-    public void insertBottomBanner(View view) {
+    public void insertBottomBanner(View view, boolean isFloat) {
         boolean isParentRelative = getParentOfLastLayout() instanceof RelativeLayout;
         ViewGroup parent = getParentOfLastLayout();
         parent.removeView(lastLayout);
@@ -538,20 +686,28 @@ public class LayoutMaker {
             rl = (RelativeLayout) parent;
         } else {
             rl = new RelativeLayout(context);
-            rl.setBackgroundColor(Color.WHITE);
+            //rl.setBackgroundColor(colorBG);
         }
 
-        RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        view.setId(viewID);
-        rllp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        rl.addView(view, rllp);
+        if (isFloat) {
+            RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+            rl.addView(lastLayout, 0, rllpMain);
+            RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            rllp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            rl.addView(view, rllp);
+        } else {
+            RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            view.setId(viewID);
+            rllp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+            rl.addView(view, rllp);
 
-        RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
-        rllpMain.addRule(RelativeLayout.ABOVE, viewID++);
-        if (rl.getChildCount() == 2) {
-            rllpMain.addRule(RelativeLayout.BELOW, rl.getChildAt(0).getId());
+            RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+            rllpMain.addRule(RelativeLayout.ABOVE, viewID++);
+            if (rl.getChildCount() == 2) {
+                rllpMain.addRule(RelativeLayout.BELOW, rl.getChildAt(0).getId());
+            }
+            rl.addView(lastLayout, rllpMain);
         }
-        rl.addView(lastLayout, rllpMain);
         if (!isParentRelative) {
             parent.addView(rl, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
         }
@@ -563,10 +719,28 @@ public class LayoutMaker {
      * 可連續呼叫，跳離多次後，再繼續增加其他ColLayout或RowLayout
      */
     public void escape() {
+        escape(false);
+    }
+
+    /**
+     * 跳出"目前Layout"，使"目前Layout"指向其Parent(上一層)
+     * 若是在呼叫了addTopBanner()或是addBottomBanner()的狀況，則會跳回先前的Layout (仍然像是上一層的概念)
+     * 可連續呼叫，跳離多次後，再繼續增加其他ColLayout或RowLayout
+     */
+    public void escape(boolean force) {
         if (lastLayout != mainLayout) {
+            ViewGroup vg = lastLayout;
             lastLayout = getParentOfLastLayout();
-            if (lastLayout instanceof RelativeLayout && lastLayout.getChildAt(lastLayout.getChildCount() - 1) instanceof LinearLayout) {
-                lastLayout = (LinearLayout) lastLayout.getChildAt(lastLayout.getChildCount() - 1);
+            if (lastLayout instanceof RelativeLayout) {
+                if (force) {
+                    lastLayout = getParentOfLastLayout();
+                } else {
+                    if (lastLayout.getChildAt(lastLayout.getChildCount() - 1) instanceof LinearLayout && lastLayout.getChildAt(lastLayout.getChildCount() - 1) != vg) {
+                        lastLayout = (LinearLayout) lastLayout.getChildAt(lastLayout.getChildCount() - 1);
+                    } else {
+                        lastLayout = (LinearLayout) lastLayout.getChildAt(0);
+                    }
+                }
             }
         }
     }

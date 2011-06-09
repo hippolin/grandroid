@@ -42,6 +42,15 @@ public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject
         this.array = array;
     }
 
+    public JSONArray getArray() {
+        return array;
+    }
+
+    public void setArray(JSONArray array) {
+        this.array = array;
+        this.notifyDataSetChanged();
+    }
+
     /**
      * 
      * @return
@@ -135,6 +144,10 @@ public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject
      * @param item
      */
     public void onClickItem(int index, View view, JSONObject item) {
-        Toast.makeText(context, "not override method 'onClickItem' at JSONAdapter instance yet!", Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, "not override method 'onClickItem' at JSONAdapter instance yet!", Toast.LENGTH_SHORT).show();
+    }
+
+    public void onLongPressItem(int index, View view, JSONObject item) {
+        //Toast.makeText(context, "not override method 'onLongPressItem' at JSONAdapter instance yet!", Toast.LENGTH_SHORT).show();
     }
 }

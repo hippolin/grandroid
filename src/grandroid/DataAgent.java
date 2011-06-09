@@ -44,8 +44,8 @@ public class DataAgent {
      * 記錄下view的值 (目前只支援TextView及EditText)
      * @param obj 設定過Tag屬性的View
      */
-    public void keep(View obj) {
-        keep(obj, true);
+    public <T extends View> T keep(T obj) {
+        return keep(obj, true);
     }
 
     /**
@@ -53,8 +53,8 @@ public class DataAgent {
      * @param activity
      * @param viewID
      */
-    public void keep(Activity activity, int viewID) {
-        keep(activity, viewID, true);
+    public View keep(Activity activity, int viewID) {
+        return keep(activity, viewID, true);
     }
 
     /**
@@ -63,11 +63,12 @@ public class DataAgent {
      * @param viewID Resource ID
      * @param fillView 是否要載入先前的資料
      */
-    public void keep(Activity activity, int viewID, boolean fillView) {
+    public View keep(Activity activity, int viewID, boolean fillView) {
         View obj = activity.findViewById(viewID);
         if (obj != null) {
             keep(obj, fillView);
         }
+        return obj;
     }
 
     /**
@@ -75,11 +76,12 @@ public class DataAgent {
      * @param obj view物件
      * @param fillView 是否要載入先前的資料
      */
-    public void keep(View obj, boolean fillView) {
+    public <T extends View> T keep(T obj, boolean fillView) {
         if (fillView) {
             load(obj);
         }
         subject.put(obj.getTag(), obj);
+        return obj;
     }
 
     /**
@@ -136,6 +138,14 @@ public class DataAgent {
     public Object putPreference(String key, String value) {
         settings.edit().putString(key, value).commit();
         return value;
+    }
+
+    public SharedPreferences getPreferences() {
+        return settings;
+    }
+
+    public Editor getEditor() {
+        return settings.edit();
     }
 
     /**

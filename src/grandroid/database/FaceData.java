@@ -311,12 +311,27 @@ public class FaceData extends SQLiteOpenHelper {
         db4read = this.getReadableDatabase();
     }
 
+    public void acceptVisitor(String tableName, String where, CursorVisitor visitor) {
+        prepareDatabase();
+        Cursor cursor = db4read.rawQuery("Select * from " + tableName + " " + where, null);
+        boolean keepRunning = true;
+        try {
+            while (keepRunning && cursor.moveToNext()) {
+                keepRunning = visitor.handleRow(cursor);
+            }
+            cursor.close();
+            visitor.afterVisit();
+        } catch (Exception ex) {
+            visitor.onError(ex);
+        }
+
+    }
+
     @Override
     protected void finalize() throws Throwable {
         close();
         super.finalize();
     }
-
 //    public void close() {
 //        if (db4read != null && db4read.isOpen()) {
 //            db4read.close();

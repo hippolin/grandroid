@@ -13,6 +13,9 @@ import android.widget.Toast;
  */
 public class ToastAction extends ContextAction {
 
+    protected String msg;
+    protected int length;
+
     /**
      * 
      * @param context
@@ -20,7 +23,8 @@ public class ToastAction extends ContextAction {
      */
     public ToastAction(Context context, String actionName) {
         super(context, actionName);
-        args = new Object[1];
+        msg = "";
+        length = Toast.LENGTH_SHORT;
     }
 
     /**
@@ -29,7 +33,8 @@ public class ToastAction extends ContextAction {
      */
     public ToastAction(Context context) {
         super(context);
-        args = new Object[1];
+        msg = "";
+        length = Toast.LENGTH_SHORT;
     }
 
     /**
@@ -38,8 +43,16 @@ public class ToastAction extends ContextAction {
      * @return
      */
     public ToastAction setMessage(String msg) {
-        args[0] = msg;
+        this.msg = msg;
         return this;
+    }
+
+    /**
+     * 
+     * @param length
+     */
+    public void setLength(int length) {
+        this.length = length;
     }
 
     /**
@@ -49,7 +62,7 @@ public class ToastAction extends ContextAction {
      */
     @Override
     public boolean execute(Context context) {
-        Toast.makeText(context, (String) args[0], Toast.LENGTH_LONG).show();
+        Toast.makeText(context, msg, length).show();
         return true;
     }
 }

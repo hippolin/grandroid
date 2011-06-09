@@ -32,7 +32,7 @@ public abstract class RotationFace extends Face {
     /**
      * 
      */
-    protected Class nextFrameClass;
+    protected GoAction changeFaceAction;
 
     /**
      * 禁止覆寫onCreate，使用RotationFace應覆寫initLayout()及updateFakeLayout()
@@ -108,8 +108,8 @@ public abstract class RotationFace extends Face {
      * 讓app跳到Class c所指定的頁面
      * @param c
      */
-    public void gotoFace(Class<? extends Face> c) {
-        gotoFace(c, true);
+    public void gotoFace(GoAction changeFaceAction) {
+        gotoFace(changeFaceAction, true);
     }
 
     /**
@@ -117,12 +117,12 @@ public abstract class RotationFace extends Face {
      * @param c
      * @param updateLayout
      */
-    public void gotoFace(Class<? extends Face> c, boolean updateLayout) {
+    public void gotoFace(GoAction changeFaceAction, boolean updateLayout) {
         if (beforeFaceChange()) {
             if (updateLayout) {
                 prepareFakeLayout();
             }
-            nextFrameClass = c;
+            this.changeFaceAction = changeFaceAction;
             new FaceRotator(this).play();
         }
     }
@@ -147,14 +147,13 @@ public abstract class RotationFace extends Face {
         return fakeLayout;
     }
 
-    
     /**
      * 不提供開發者叫用
      */
     public void changeFrame() {
-        if (nextFrameClass != null) {
-            new GoAction(this, "", nextFrameClass).execute();
-            nextFrameClass = null;
+        if (changeFaceAction != null) {
+            changeFaceAction.execute();
+            changeFaceAction = null;
         }
     }
 

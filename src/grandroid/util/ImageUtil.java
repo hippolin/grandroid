@@ -10,19 +10,25 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.util.Log;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.ByteArrayBuffer;
 
 /**
  *
@@ -39,7 +45,7 @@ public class ImageUtil {
     }
 
     public static Bitmap loadBitmap(String uri) throws Exception {
-        if (uri.startsWith("http://")) {
+        if (uri.startsWith("http")) {
             return loadBitmap(new URL(uri));
         } else {
             return loadBitmap(new File(uri));
@@ -68,7 +74,7 @@ public class ImageUtil {
             try {
                 httpRequest = new HttpGet(url.toURI());
             } catch (URISyntaxException e) {
-                Log.e("grandroid-image", null, e);
+                Log.e("grandroid", null, e);
                 throw e;
             }
 
@@ -80,10 +86,49 @@ public class ImageUtil {
             InputStream instream = bufHttpEntity.getContent();
             bitmap = BitmapFactory.decodeStream(instream);
         } catch (Exception e) {
-            Log.e("grandroid-image", null, e);
+            Log.e("grandroid", null, e);
             throw e;
         }
         return bitmap;
+    }
+
+    public static Bitmap downloadAndLoad(URL url, String path, String filename) throws Exception {
+        /* 資料夾不在就先建立 */
+        File f = new File(Environment.getExternalStorageDirectory(), path);
+
+        if (!f.exists()) {
+            f.mkdir();
+        }
+        /* 儲存相片檔 */
+        File n = new File(f, filename);
+        return downloadAndLoad(url, n);
+    }
+
+    public static Bitmap downloadAndLoad(URL url, File file) throws Exception {
+        /* Open a connection to that URL. */
+        URLConnection ucon = url.openConnection();
+
+        /*
+         * Define InputStreams to read from the URLConnection.
+         */
+        InputStream is = ucon.getInputStream();
+        BufferedInputStream bis = new BufferedInputStream(is);
+
+        /*
+         * Read bytes to the Buffer until there is nothing more to read(-1).
+         */
+        ByteArrayBuffer baf = new ByteArrayBuffer(50);
+        int current = 0;
+        while ((current = bis.read()) != -1) {
+            baf.append((byte) current);
+        }
+
+        /* Convert the Bytes read to a String. */
+        FileOutputStream fos = new FileOutputStream(file);
+        byte[] imageByteArray = baf.toByteArray();
+        fos.write(imageByteArray);
+        fos.close();
+        return BitmapFactory.decodeByteArray(imageByteArray, 0, imageByteArray.length);
     }
 
     public static Bitmap loadBitmap(File file) throws FileNotFoundException {
@@ -92,6 +137,73 @@ public class ImageUtil {
         } else {
             throw new FileNotFoundException();
         }
+    }
+
+    public static String saveBitmap(Bitmap bitmap, String path) {
+        long cnt = System.currentTimeMillis();
+        return saveBitmap(bitmap, path, cnt + ".jpg", true, 95);
+    }
+
+    public static String saveBitmap(Bitmap bitmap, String path, String fileNamePrefix, String fileNameSuffix, boolean saveAsJPEG, int quality) {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            try {
+                /* 資料夾不在就先建立 */
+                File f = new File(Environment.getExternalStorageDirectory(), path);
+                if (!f.exists()) {
+                    f.mkdir();
+                }
+                NumberFormat nf = new DecimalFormat("0000");
+                for (int fileIndex = 1; fileIndex <= 9999; fileIndex++) {
+                    String fileName = fileNamePrefix + nf.format(fileIndex) + fileNameSuffix;
+                    File n = new File(f, fileName);
+                    if (!n.exists()) {
+                        return saveBitmap(bitmap, path, fileName, saveAsJPEG, quality);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("grandroid", null, e);
+            }
+        }
+        return null;
+    }
+
+    public static String saveBitmap(Bitmap bitmap, String path, String fileName, boolean saveAsJPEG, int quality) {
+        /* 儲存檔案 */
+        if (bitmap != null) {
+            /* 檢視SDCard是否存在 */
+            if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+                /* SD卡不存在，顯示Toast訊息 */
+            } else {
+                try {
+                    /* 資料夾不在就先建立 */
+                    File f = new File(
+                            Environment.getExternalStorageDirectory(), path);
+
+                    if (!f.exists()) {
+                        f.mkdir();
+                    }
+
+                    /* 儲存相片檔 */
+                    File n = new File(f, fileName);
+                    FileOutputStream bos =
+                            new FileOutputStream(n.getAbsolutePath());
+                    /* 檔案轉換 */
+                    if (saveAsJPEG) {
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, bos);
+                    } else {
+                        bitmap.compress(Bitmap.CompressFormat.PNG, quality, bos);
+                    }
+                    /* 呼叫flush()方法，更新BufferStream */
+                    bos.flush();
+                    /* 結束OutputStream */
+                    bos.close();
+                    return n.getAbsolutePath();
+                } catch (Exception e) {
+                    Log.e("grandroid", null, e);
+                }
+            }
+        }
+        return null;
     }
 
     public static Bitmap resizeBitmap(Bitmap bitmap, float scale) {
@@ -114,6 +226,23 @@ public class ImageUtil {
         Canvas canvas = new Canvas(bmOverlay);
         canvas.drawBitmap(bmp1, new Matrix(), null);
         canvas.drawBitmap(bmp2, left, top, null);
+        return bmOverlay;
+    }
+
+    public static Bitmap cut(Bitmap bmp) {
+        int w = bmp.getWidth();
+        int h = bmp.getHeight();
+        if (w > h) {
+            return cut(bmp, (w - h) / 2, 0);
+        } else {
+            return cut(bmp, (h - w) / 2, 0);
+        }
+    }
+
+    public static Bitmap cut(Bitmap bmp, int cutX, int cutY) {
+        Bitmap bmOverlay = Bitmap.createBitmap(bmp.getWidth() - 2 * cutX, bmp.getHeight() - 2 * cutY, bmp.getConfig());
+        Canvas canvas = new Canvas(bmOverlay);
+        canvas.drawBitmap(bmp, -cutX, -cutY, null);
         return bmOverlay;
     }
 }

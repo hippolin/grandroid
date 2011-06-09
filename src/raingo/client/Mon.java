@@ -11,9 +11,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,6 +53,10 @@ public class Mon {
         return this;
     }
 
+    public void clear() {
+        param.clear();
+    }
+
     /**
      * 開始連線傳輸，並將結果JSON文字包成JSONObject回傳
      * @return server端回傳的JSON文字所包裝成的JSONObject
@@ -87,7 +91,7 @@ public class Mon {
             httpConn.setRequestMethod("POST");//设置URL请求方法
             String requestString = "";
             for (String key : param.keySet()) {
-                String encodedValue = key + "=" + URLEncoder.encode(param.get(key), "UTF-8");
+                String encodedValue = key + "=" + URLEncoder.encode(param.get(key).replaceAll("\\\\/", "/"), "UTF-8");
                 requestString += requestString.length() == 0 ? encodedValue : "&" + encodedValue;
             }
             byte[] requestStringBytes = requestString.getBytes("UTF-8");
@@ -120,7 +124,7 @@ public class Mon {
                 return "{\"msg\":\"Mon connect fail\",\"code\":" + responseCode + "}";
             }
         } catch (Exception ex) {
-            Log.e("grandroid", ex.toString());
+            Log.e("grandroid", null, ex);
             return "{msg:\"" + ex.toString() + "\"}";
         }
     }
@@ -137,11 +141,32 @@ public class Mon {
         //System.out.println(mon.put("col", "test").put("act", "*").send());
         //System.out.println(mon.put("col", "test").put("act", "?").put("json", "{\"target\":\"ruby\"}").send());
         //System.out.println(mon.put("col", "WordBank").put("act", "-").put("json","{ \"_id\" : { \"$oid\" : \"4c4423503cb9a6998cf85edb\"}}").send());
-        Date dt = new Date();
-        Calendar c1 = Calendar.getInstance();
-        c1.add(Calendar.DATE, -1 * dt.getDay());
-        Calendar c2 = Calendar.getInstance();
-        c2.add(Calendar.DATE, 7 - dt.getDay());
-        System.out.println(c1.getTime() + " ~ " + c2.getTime());
+        Mon mon = new Mon("http://m.family.com.tw/api/active.php");
+        try {
+            //System.out.println(mon.put("page", "get_mission_now").put("user_id", "9").send());
+            //System.out.println(mon.put("page", "get_store").put("user_id", "9").put("update_time_last", "null").send());
+            //System.out.println(mon.put("page", "save_pvc").put("user_id", "56").put("pvc_id", "1").put("mission_id", "1").put("store_id", "005891").send());
+            //System.out.println(mon.put("page", "get_pvc").put("user_id", "56").put("mission_id", "1").put("store_id", "005891").send());
+            //System.out.println(mon.put("page", "get_mission_pvc").put("user_id", "9").put("mission_id", "1").send());
+            //System.out.println(mon.put("page", "get_all_action").put("user_id", "62").send());
+            //System.out.println(mon.put("page", "get_info").put("user_id", "9").send());
+            //System.out.println(mon.put("page", "close").put("user_id", "62").send());
+            //Mon mon = new Mon("http://family.hiiir.com/api/active.php");
+            //System.out.println(mon.put("page", "get_store").put("user_id", "9").put("update_time_last", "2011-03-20 08:00:00").send());
+            //System.out.println(mon.put("page", "restart").put("user_id", "62").put("user_latitude", "24.5").put("user_longitude", "121.5421").send());
+            //System.out.println(mon.put("page", "get_lbs").put("user_id", "1").put("time", "2011-04-01 10:10:10").send());
+            //System.out.println(mon.put("page", "get_lbs_message").put("user_id", "1").send());
+            //System.out.println(mon.put("page", "get_food").put("group", "1").send());
+            JSONArray arr = mon.put("page", "get_food").put("group", "1").sendAndWrap().getJSONArray("food");
+            for (int i = 0; i < arr.length(); i++) {
+                System.out.println(arr.get(i).toString());
+            }
+            //System.out.println(mon.put("page", "get_food_today").put("date", "2011-04-13").put("user_id", "1").send());
+            //System.out.println(mon.put("page", "save_activity").put("date", "2011-04-13").put("user_id", "1").put("step", "210").put("expend_time", "312").put("calorie", "36").send());
+            //System.out.println(mon.put("page", "get_calorie").put("date", "2011-04-13").put("user_id", "1").send());
+            //System.out.println(mon.put("page", "get_calorie").put("date", "2011-04-13").put("user_id", "1").send());
+        } catch (JSONException ex) {
+            Logger.getLogger(Mon.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

@@ -20,7 +20,6 @@ public class FinishAction extends Action {
     public boolean execute() {
         int pid = android.os.Process.myPid();
         android.os.Process.killProcess(pid);
-        AppStatus.FIHISHED = true;
         return true;
     }
 }

@@ -15,35 +15,35 @@ import java.util.TimerTask;
 public abstract class TimerService extends BasicService {
 
     /**
-     * 
+     *
      */
     protected Timer timer;
-
+    
     /**
-     * 
+     *
      */
     public TimerService() {
         super();
-
+        
     }
-
+    
     /**
-     * 
+     *
      */
     @Override
     public void onCreate() {
         super.onCreate();
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
-
+            
             public void run() {
                 execute();
             }
         }, 0l, getServiceInterval());
     }
-
+    
     /**
-     * 
+     *
      * @param intent
      * @param startId
      */
@@ -55,15 +55,15 @@ public abstract class TimerService extends BasicService {
         }
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
-
+            
             public void run() {
                 execute();
             }
         }, 0l, getServiceInterval());
     }
-
+    
     /**
-     * 
+     *
      */
     @Override
     public void onDestroy() {

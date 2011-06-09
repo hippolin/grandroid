@@ -94,6 +94,10 @@ public class Action {
         return this;
     }
 
+    public Object[] getArgs() {
+        return args;
+    }
+    
     /**
      * Action被執行時呼叫的函數
      * 一般應該要覆寫本函數，否則會什麼也不做

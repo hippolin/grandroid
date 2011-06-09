@@ -14,6 +14,11 @@ import android.content.DialogInterface;
  */
 public class AlertAction extends ContextAction {
 
+    protected String title;
+    protected String msg;
+    protected Action actPositive;
+    protected Action actNegative;
+
     /**
      * 
      * @param context
@@ -33,17 +38,6 @@ public class AlertAction extends ContextAction {
 
     /**
      * 
-     */
-    protected void init() {
-        args = new Object[4];
-        args[0] = "確認";
-        args[1] = "測試訊息";
-        args[2] = new Action("確定");
-        args[3] = new Action("取消");
-    }
-
-    /**
-     * 
      * @param title
      * @param msg
      * @param actPositive
@@ -52,16 +46,16 @@ public class AlertAction extends ContextAction {
      */
     public AlertAction setData(String title, String msg, Action actPositive, Action actNegative) {
         if (title != null) {
-            args[0] = title;
+            this.title = title;
         }
         if (msg != null) {
-            args[1] = msg;
+            this.msg = msg;
         }
         if (actPositive != null) {
-            args[2] = actPositive;
+            this.actPositive = actPositive;
         }
         if (actNegative != null) {
-            args[3] = actNegative;
+            this.actNegative = actNegative;
         }
         return this;
     }
@@ -73,20 +67,20 @@ public class AlertAction extends ContextAction {
      */
     @Override
     public boolean execute(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context).setTitle((String) args[0]).setMessage((String) args[1]);
-        if ((Action) args[2] != null) {
-            builder.setPositiveButton(((Action) args[2]).getActionName(), new DialogInterface.OnClickListener() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context).setTitle(title).setMessage(msg);
+        if (actPositive != null) {
+            builder.setPositiveButton(actPositive.getActionName(), new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface arg0, int arg1) {
-                    ((Action) args[2]).execute();
+                    actPositive.execute();
                 }
             });
         }
-        if ((Action) args[2] != null) {
-            builder.setNegativeButton(((Action) args[3]).getActionName(), new DialogInterface.OnClickListener() {
+        if (actNegative != null) {
+            builder.setNegativeButton(actNegative.getActionName(), new DialogInterface.OnClickListener() {
 
                 public void onClick(DialogInterface arg0, int arg1) {
-                    ((Action) args[3]).execute();
+                    actNegative.execute();
                 }
             });
         }

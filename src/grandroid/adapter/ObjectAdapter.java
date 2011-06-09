@@ -105,6 +105,16 @@ public abstract class ObjectAdapter<T> extends BaseAdapter implements ItemClicka
      * @param item
      */
     public void onClickItem(int index, View view, T item) {
-        Toast.makeText(context, "not override method 'onClickItem' at JSONAdapter instance yet!", Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, "not override method 'onClickItem' at JSONAdapter instance yet!", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 
+     * @param index
+     * @param view
+     * @param item
+     */
+    public void onLongPressItem(int index, View view, T item) {
+        //Toast.makeText(context, "not override method 'onLongPressItem' at JSONAdapter instance yet!", Toast.LENGTH_SHORT).show();
     }
 }

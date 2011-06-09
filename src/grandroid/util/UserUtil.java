@@ -178,7 +178,7 @@ public class UserUtil {
             //e.printStackTrace();
         }
 
-        return list.size() == 0 ? null : list;
+        return list.isEmpty() ? null : list;
     }
 
     /**
@@ -193,7 +193,7 @@ public class UserUtil {
                 if (sb.length() == 0) {
                     sb.append(str);
                 } else {
-                    sb.append("," + str);
+                    sb.append(",").append(str);
                 }
             }
         }

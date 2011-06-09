@@ -38,7 +38,9 @@ public abstract class DialogMask {
 
     public void show() {
         try {
-            LayoutMaker maker = new LayoutMaker(context, false);
+            LinearLayout ll=new LinearLayout(context);
+            ll.setOrientation(LinearLayout.VERTICAL);
+            LayoutMaker maker = new LayoutMaker(context, ll);
             builder.beforeDialogContent(maker);
             setupMask(context, builder, maker);
             dialog = builder.create(maker);
