@@ -77,48 +77,61 @@ public class FaceData extends SQLiteOpenHelper {
             db4write.execSQL("create TABLE IF NOT EXISTS " + tableName + " (_id INTEGER primary key autoincrement, " + fieldPart + ")");
             return true;
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
+            Log.e("grandroid", null, e);
             return false;
         } finally {
             db4write.close();
         }
     }
 
-    /**
-     * 
-     * @param tableName
-     * @param cv
-     * @return
-     */
-    public long insert(String tableName, ContentValues cv) {
-        SQLiteDatabase db4write = null;
-        try {
-            db4write = this.getWritableDatabase();
-            return db4write.insert(tableName, null, cv);
-        } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
-            return -1;
-        } finally {
-            db4write.close();
+    public boolean addColumn(String tableName, String col, TypeMapping type) {
+        return addColumn(tableName, col, type, null);
+    }
+
+    public boolean addColumn(String tableName, String col, TypeMapping type, String defaultValue) {
+        try {//DEFAULT 'baz'
+            defaultValue = defaultValue == null ? "" : " DEFAULT " + defaultValue;
+            return exec("ALTER TABLE " + tableName + " ADD COLUMN " + col + " " + type.getSqlType() + defaultValue + ";");
+        } catch (Exception ex) {
+            Log.e("grandroid", "fail to add column " + col + " to " + tableName);
+            return false;
         }
     }
 
     /**
      * 
      * @param tableName
-     * @param index
      * @param cv
      * @return
      */
-    public boolean update(String tableName, int index, ContentValues cv) {
+    public long insert(String tableName, ContentValues cv) throws Exception {
         SQLiteDatabase db4write = null;
         try {
-            String where = "_id=?";
             db4write = this.getWritableDatabase();
-            db4write.update(tableName, cv, where, new String[]{Integer.toString(index)});
-            return true;
+            return db4write.insert(tableName, null, cv);
+        } finally {
+            db4write.close();
+        }
+    }
+
+    public boolean update(String tableName, int index, ContentValues updateValues) {
+        return update(tableName, "_id=?", new String[]{Integer.toString(index)}, updateValues);
+    }
+
+    /**
+     * 
+     * @param tableName
+     * @param index
+     * @param updateValues
+     * @return
+     */
+    public boolean update(String tableName, String whereParamString, String[] whereValues, ContentValues updateValues) {
+        SQLiteDatabase db4write = null;
+        try {
+            db4write = this.getWritableDatabase();
+            return db4write.update(tableName, updateValues, whereParamString, whereValues) > 0;
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
+            Log.e("grandroid", null, e);
             return false;
         } finally {
             db4write.close();
@@ -137,7 +150,7 @@ public class FaceData extends SQLiteOpenHelper {
             db4write.execSQL(sql);
             return true;
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
+            Log.e("grandroid", null, e);
             return false;
         } finally {
             db4write.close();
@@ -158,7 +171,7 @@ public class FaceData extends SQLiteOpenHelper {
             db4write.delete(tableName, where, new String[]{Integer.toString(index)});
             return true;
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
+            Log.e("grandroid", null, e);
             return false;
         } finally {
             db4write.close();
@@ -178,7 +191,7 @@ public class FaceData extends SQLiteOpenHelper {
             db4write.execSQL("Delete from " + tableName + " " + where);
             return true;
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
+            Log.e("grandroid", null, e);
             return false;
         } finally {
             db4write.close();
@@ -197,7 +210,7 @@ public class FaceData extends SQLiteOpenHelper {
             db4write.delete(tableName, null, null);
             return true;
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
+            Log.e("grandroid", null, e);
             return false;
         } finally {
             db4write.close();
@@ -216,7 +229,7 @@ public class FaceData extends SQLiteOpenHelper {
             db4write.execSQL("drop table if exists " + tableName);
             return true;
         } catch (Exception e) {
-            Log.e(this.getClass().getName(), e.toString());
+            Log.e("grandroid", null, e);
             return false;
         } finally {
             db4write.close();

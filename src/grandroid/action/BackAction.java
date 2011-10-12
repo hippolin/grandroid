@@ -18,6 +18,10 @@ public class BackAction extends ContextAction {
         super(context);
     }
 
+    public BackAction(Context context, String actionName) {
+        super(context, actionName);
+    }
+
     @Override
     public boolean execute(Context context) {
 //        new Thread(new Runnable()    {

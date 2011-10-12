@@ -294,6 +294,20 @@ public class LayoutMaker {
     }
 
     /**
+     * 產生一個圖片按鈕，並加入到"目前Layout"
+     * 加入Layout時的參數：當"目前Layout"的Orientation橫向時為layWW(1)；其他狀況為layWW(0)
+     * @param <T> 需要產生影像物件的類別，一般為ImageView.class或ImageButton.class
+     * @param viewClass 需要產生影像物件的類別，一般為ImageView.class或ImageButton.class
+     * @param bitmap 影像bitmap
+     * @return 生成的物件
+     */
+    public <T extends ImageView> T addImage(Class<T> viewClass, Bitmap bitmap) {
+        T iv = createImage(viewClass, bitmap);
+        lastLayout.addView(iv, layWW(lastLayout instanceof LinearLayout && ((LinearLayout) lastLayout).getOrientation() == LinearLayout.HORIZONTAL ? 1 : 0));
+        return iv;
+    }
+
+    /**
      * 使用網路上的圖片產生一個影像按鈕，並加入到"目前Layout"
      * 加入Layout時的參數：當"目前Layout"的Orientation橫向時為layWW(1)；其他狀況為layWW(0)
      * @param <T> 需要產生影像物件的類別，一般為ImageView.class或ImageButton.class
@@ -323,6 +337,8 @@ public class LayoutMaker {
     public CheckBox createCheckBox(boolean checked) {
         CheckBox cb = new CheckBox(context);
         cb.setChecked(checked);
+        cb.setTextColor(Color.BLACK);
+        cb.setTextSize(20);
         return cb;
 
     }
@@ -335,8 +351,9 @@ public class LayoutMaker {
 
     public CheckBox addCheckBox(boolean checked, String text) {
         CheckBox cb = createCheckBox(checked);
+        cb.setText(text);
         lastLayout.addView(cb);
-        addTextView(text);
+        //addTextView(text);
         return cb;
     }
 
@@ -416,6 +433,14 @@ public class LayoutMaker {
 
     public Spinner addSpinner(BaseAdapter adapter) {
         return addSpinner(adapter, false);
+    }
+
+    /**
+     * 傳回一個LayoutParams物件(W=FILL_PARENT, H=FILL_PARENT)
+     * @return 生成的LinearLayout.LayoutParams物件
+     */
+    public LinearLayout.LayoutParams lay(int width, int height, int weight) {
+        return new LinearLayout.LayoutParams(width, height, weight);
     }
 
     /**
@@ -680,7 +705,8 @@ public class LayoutMaker {
     public void insertBottomBanner(View view, boolean isFloat) {
         boolean isParentRelative = getParentOfLastLayout() instanceof RelativeLayout;
         ViewGroup parent = getParentOfLastLayout();
-        parent.removeView(lastLayout);
+        ViewGroup current = getDecoratedLastLayout();
+        parent.removeView(current);
         RelativeLayout rl;
         if (isParentRelative) {
             rl = (RelativeLayout) parent;
@@ -691,7 +717,7 @@ public class LayoutMaker {
 
         if (isFloat) {
             RelativeLayout.LayoutParams rllpMain = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
-            rl.addView(lastLayout, 0, rllpMain);
+            rl.addView(current, 0, rllpMain);
             RelativeLayout.LayoutParams rllp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
             rllp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             rl.addView(view, rllp);
@@ -706,7 +732,7 @@ public class LayoutMaker {
             if (rl.getChildCount() == 2) {
                 rllpMain.addRule(RelativeLayout.BELOW, rl.getChildAt(0).getId());
             }
-            rl.addView(lastLayout, rllpMain);
+            rl.addView(current, rllpMain);
         }
         if (!isParentRelative) {
             parent.addView(rl, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT));
@@ -736,9 +762,16 @@ public class LayoutMaker {
                     lastLayout = getParentOfLastLayout();
                 } else {
                     if (lastLayout.getChildAt(lastLayout.getChildCount() - 1) instanceof LinearLayout && lastLayout.getChildAt(lastLayout.getChildCount() - 1) != vg) {
-                        lastLayout = (LinearLayout) lastLayout.getChildAt(lastLayout.getChildCount() - 1);
+                        lastLayout = (ViewGroup) lastLayout.getChildAt(lastLayout.getChildCount() - 1);
                     } else {
-                        lastLayout = (LinearLayout) lastLayout.getChildAt(0);
+                        lastLayout = (ViewGroup) lastLayout.getChildAt(0);
+                    }
+                    if (!(lastLayout instanceof LinearLayout)) {
+                        for (int i = 0; i < lastLayout.getChildCount(); i++) {
+                            if (lastLayout.getChildAt(i) instanceof LinearLayout) {
+                                lastLayout = (LinearLayout) lastLayout.getChildAt(i);
+                            }
+                        }
                     }
                 }
             }
@@ -793,6 +826,14 @@ public class LayoutMaker {
             return (ViewGroup) lastLayout.getParent().getParent();
         } else {
             return (ViewGroup) lastLayout.getParent();
+        }
+    }
+
+    protected ViewGroup getDecoratedLastLayout() {
+        if (lastLayout.getParent() instanceof ScrollView || lastLayout.getParent() instanceof HorizontalScrollView) {
+            return (ViewGroup) lastLayout.getParent();
+        } else {
+            return (ViewGroup) lastLayout;
         }
     }
 

@@ -37,6 +37,11 @@ public abstract class ObjectAdapter<T> extends BaseAdapter implements ItemClicka
         this.list = list;
     }
 
+    public void setList(List<T> list) {
+        this.list = list;
+        this.notifyDataSetChanged();
+    }
+
     /**
      * 
      * @return
@@ -97,7 +102,7 @@ public abstract class ObjectAdapter<T> extends BaseAdapter implements ItemClicka
      * @param item
      */
     public abstract void fillRowView(int index, View cellRenderer, T item);
-    
+
     /**
      * 
      * @param index

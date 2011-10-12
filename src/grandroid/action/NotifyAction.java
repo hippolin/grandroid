@@ -26,6 +26,7 @@ public class NotifyAction extends ContextAction {
     protected Bundle extra;
     protected int flag;
     protected boolean autoCancel;
+    protected boolean virbation;
 
     /**
      * 
@@ -88,6 +89,15 @@ public class NotifyAction extends ContextAction {
         return this;
     }
 
+    public boolean isVirbation() {
+        return virbation;
+    }
+
+    public NotifyAction setVirbation(boolean virbation) {
+        this.virbation = virbation;
+        return this;
+    }
+
     /**
      * 
      * @param context
@@ -105,11 +115,16 @@ public class NotifyAction extends ContextAction {
         Intent notificationIntent = target != null ? new Intent(context, target) : null;
         if (notificationIntent != null) {
             notificationIntent.putExtras(extra);
+            //notificationIntent.setFlags(flag);
         }
         PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, flag);
 
         no.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-
+        if (virbation) {
+            no.defaults |= Notification.DEFAULT_VIBRATE;
+            long[] vibrate = {0, 100, 200, 300};
+            no.vibrate = vibrate;
+        }
         manager.notify(group, no);
         return true;
     }

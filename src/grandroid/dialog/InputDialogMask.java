@@ -49,21 +49,27 @@ public abstract class InputDialogMask extends DialogMask {
         if (hintText != null && hintText.length() > 0) {
             et.setHint(hintText);
         }
-        builder.setPositiveButton(new Action(context.getString(maker.getResourceID("string/grand_btn_yes"))) {
+        builder.setPositiveButton(new Action(context.getString(android.R.string.ok)) {
 
             @Override
             public boolean execute() {
-                if (executeAction(et.getText().toString())) {
-                    dialog.dismiss();
+                if (dialog != null) {
+                    if (executeAction(et.getText().toString())) {
+                        dialog.dismiss();
+                    }
+                } else {
+                    return executeAction(et.getText().toString());
                 }
                 return true;
             }
         });
-        builder.setNegativeButton(new Action(context.getString(maker.getResourceID("string/grand_btn_cancel"))) {
+        builder.setNegativeButton(new Action(context.getString(android.R.string.cancel)) {
 
             @Override
             public boolean execute() {
-                dialog.dismiss();
+                if (dialog != null) {
+                    dialog.cancel();
+                }
                 return true;
             }
         });

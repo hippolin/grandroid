@@ -5,10 +5,9 @@
 package grandroid.util;
 
 import android.app.Activity;
-import android.graphics.Rect;
+import android.content.res.Configuration;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Window;
+import android.view.Display;
 
 /**
  *
@@ -32,6 +31,7 @@ public class LayoutUtil {
     protected int rigidSpace;
     protected int excluseSpace;
     protected int cumulatePadding;
+    protected int orientation;
 
     /**
      * default setting: statusBar=true, titleBar=false, compatibleMode=true;
@@ -46,12 +46,31 @@ public class LayoutUtil {
         this.titleBar = titleBar;
         this.compatibleMode = compatibleMode;
         metrics = new DisplayMetrics();
-        frame.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        Display display = frame.getWindowManager().getDefaultDisplay();
+        display.getMetrics(metrics);
 
         width = metrics.widthPixels;
         height = metrics.heightPixels;
 
-        //Log.d("grandroid", "titleBarHeight = " + titleBarHeight);
+        orientation = Configuration.ORIENTATION_UNDEFINED;
+        if (display.getWidth() == display.getHeight()) {
+            orientation = Configuration.ORIENTATION_SQUARE;
+        } else {
+            if (display.getWidth() < display.getHeight()) {
+                orientation = Configuration.ORIENTATION_PORTRAIT;
+            } else {
+                orientation = Configuration.ORIENTATION_LANDSCAPE;
+            }
+        }
+    }
+
+    public DisplayMetrics getDisplayMetrics() {
+        return metrics;
+    }
+
+    public int getScreenOrientation() {
+        return orientation;
     }
 
     /**

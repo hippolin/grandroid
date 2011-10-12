@@ -25,6 +25,7 @@ public abstract class ThreadAction extends ContextAction implements Runnable {
      * 
      */
     protected Handler handler;
+    protected Thread th;
 
     /**
      * 
@@ -41,7 +42,8 @@ public abstract class ThreadAction extends ContextAction implements Runnable {
      */
     public ThreadAction(Context context, String actionName) {
         super(context, actionName);
-        new Thread(this).start();
+        th = new Thread(this);
+        th.start();
     }
 
     /**
@@ -75,7 +77,8 @@ public abstract class ThreadAction extends ContextAction implements Runnable {
         };
 
         progress.show();
-        new Thread(this).start();
+        th = new Thread(this);
+        th.start();
     }
 
     /**
@@ -86,7 +89,8 @@ public abstract class ThreadAction extends ContextAction implements Runnable {
     public ThreadAction(Context context, long delayMSecond) {
         super(context);
         this.delayMSecond = delayMSecond;
-        new Thread(this).start();
+        th = new Thread(this);
+        th.start();
     }
 
     public void run() {
@@ -101,5 +105,9 @@ public abstract class ThreadAction extends ContextAction implements Runnable {
         if (handler != null) {
             handler.sendEmptyMessage(0);
         }
+    }
+
+    public void interrupt() {
+        th.interrupt();
     }
 }

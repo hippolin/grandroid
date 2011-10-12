@@ -9,7 +9,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +23,7 @@ import grandroid.action.Action;
 import grandroid.action.AlertAction;
 import grandroid.action.ContextAction;
 import grandroid.action.NotifyAction;
+import grandroid.action.PendingAction;
 import grandroid.action.ToastAction;
 import grandroid.dialog.CommandPickModel;
 import grandroid.dialog.DateTimePickModel;
@@ -48,12 +51,12 @@ public class Face extends Activity {
      * 
      */
     protected Menu menu;
-
     /**
      * 
      */
     protected DataAgent dataAgent;
     protected DateTimePickModel model;
+    protected PendingAction pendingAction;
 
     /**
      * 
@@ -242,10 +245,12 @@ public class Face extends Activity {
      * 只支援Button與ImageButton
      * @param btnID Resource ID
      * @param act
+     * @return return view refered to btnID
      */
-    protected void setButtonEvent(int btnID, final Action act) {
+    protected View setButtonEvent(int btnID, final Action act) {
         final View btn = findViewById(btnID);
         setButtonEvent(btn, act);
+        return btn;
     }
 
     /**
@@ -253,8 +258,9 @@ public class Face extends Activity {
      * 只支援Button與ImageButton
      * @param btn
      * @param act
+     * @return return param btn
      */
-    protected void setButtonEvent(View btn, final Action act) {
+    protected <T extends View> T setButtonEvent(T btn, final Action act) {
 
         btn.setOnClickListener(new View.OnClickListener() {
 
@@ -263,6 +269,7 @@ public class Face extends Activity {
                 act.execute();
             }
         });
+        return btn;
     }
 
     /**
@@ -311,13 +318,12 @@ public class Face extends Activity {
 //                km.newKeyguardLock("Grandroid").disableKeyguard();
 //            }
     }
-    
+
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         AppStatus.ON_TOP = true;
     }
-
 
     /**
      * 
@@ -339,6 +345,20 @@ public class Face extends Activity {
 //                km.newKeyguardLock("Grandroid").reenableKeyguard();
 //            }
 //        }
+    }
+
+    public void waitingForCallback(PendingAction action) {
+        pendingAction = action;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (pendingAction != null) {
+            if (pendingAction.handleActivityResult(requestCode, resultCode, data)) {
+                pendingAction = null;
+            }
+        }
     }
 
     /**

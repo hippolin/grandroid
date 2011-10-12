@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.json.JSONArray;
@@ -32,6 +33,7 @@ public class Mon {
      * 
      */
     protected HashMap<String, String> param;
+    protected String encoding;
 
     /**
      * 
@@ -39,7 +41,21 @@ public class Mon {
      */
     public Mon(String uri) {
         this.uri = uri;
+        this.encoding = "UTF-8";
         param = new HashMap<String, String>();
+    }
+
+    /**
+     * 伺服端服務網址
+     * @return
+     */
+    public String getUri() {
+        return uri;
+    }
+
+    public Mon encode(String encoding) {
+        this.encoding = encoding;
+        return this;
     }
 
     /**
@@ -53,8 +69,23 @@ public class Mon {
         return this;
     }
 
+    /**
+     * 清除變數
+     */
     public void clear() {
         param.clear();
+    }
+
+    /**
+     * 取得參數內容 (實作方式為TreeMap.toString())
+     * @return
+     */
+    public String getParamaters() {
+        TreeMap<String, String> tm = new TreeMap<String, String>();
+        for (String key : param.keySet()) {
+            tm.put(key, param.get(key));
+        }
+        return tm.toString();
     }
 
     /**
@@ -113,8 +144,14 @@ public class Mon {
                 StringBuilder sb = new StringBuilder();
                 String readLine;
                 BufferedReader responseReader;
+                if (httpConn.getHeaderField("Content-Type") != null && httpConn.getHeaderField("Content-Type").contains("charset")) {
+                    encoding = httpConn.getHeaderField("Content-Type").substring(httpConn.getHeaderField("Content-Type").indexOf("charset=") + 8);
+                    if (encoding.contains(";")) {
+                        encoding = encoding.substring(0, encoding.indexOf(";"));
+                    }
+                }
                 //处理响应流，必须与服务器响应流输出的编码一致
-                responseReader = new BufferedReader(new InputStreamReader(httpConn.getInputStream(), "UTF-8"));
+                responseReader = new BufferedReader(new InputStreamReader(httpConn.getInputStream(), encoding));
                 while ((readLine = responseReader.readLine()) != null) {
                     sb.append(readLine).append("\n");
                 }

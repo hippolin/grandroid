@@ -132,6 +132,20 @@ public class GoAction extends ContextAction {
 
     /**
      * 
+     * @param key
+     * @param value 
+     * @return
+     */
+    public GoAction addBundleObject(String key, double value) {
+        if (this.bundle == null) {
+            bundle = new Bundle();
+        }
+        bundle.putDouble(key, value);
+        return this;
+    }
+
+    /**
+     * 
      * @param flag
      * @return
      */

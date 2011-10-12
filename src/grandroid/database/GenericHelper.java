@@ -8,6 +8,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.util.Log;
 import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *
@@ -16,6 +18,7 @@ import java.lang.reflect.Field;
  */
 public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
 
+    protected static CopyOnWriteArrayList<String> verifiedTables = new CopyOnWriteArrayList<String>();
     /**
      * 
      */
@@ -62,6 +65,24 @@ public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
         if (createTable) {
             this.create();
         }
+        if (!verifiedTables.contains(tableName)) {
+            ContentValues cv = new ContentValues();
+            for (int idx = 0; idx < farr.length; idx++) {
+                cv.put(fields[idx].getName(), "");
+            }
+            fixTable(cv);
+            verifiedTables.add(tableName);
+        }
+    }
+    
+    @Override
+    public TypeMapping getColumnType(String column) {
+        for (int idx = 0; idx < fields.length; idx++) {
+            if (column.equalsIgnoreCase(fields[idx].getName())) {
+                return types[idx];
+            }
+        }
+        return TypeMapping.STRING;
     }
 
     /**
@@ -106,11 +127,10 @@ public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
                         //str += str.length() == 0 ? fields[i].getName() + "=" + types[i].envalue(value) : ", " + fields[i].getName() + "=" + types[i].envalue(value);
                         kvs.put(fields[i].getName(), types[i].envalue(value).toString());
                     } else {
-                        Log.w(this.getClass().getName(), "getter " + fields[i].getName() + " has error (value is null)");
+                        Log.w("grandroid", "getter " + fields[i].getName() + " has error (value is null)");
                     }
-
                 } catch (Exception ex) {
-                    Log.e(this.getClass().getName(), null, ex);
+                    Log.e("grandroid", null, ex);
                 }
             }
         }
@@ -137,7 +157,7 @@ public class GenericHelper<T extends Identifiable> extends DataHelper<T> {
             }
             return obj;
         } catch (Exception ex) {
-            Log.e(this.getClass().getName(), null, ex);
+            Log.e("grandroid", null, ex);
             return null;
         }
     }

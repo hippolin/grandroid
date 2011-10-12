@@ -141,7 +141,7 @@ public class ImageUtil {
 
     public static String saveBitmap(Bitmap bitmap, String path) {
         long cnt = System.currentTimeMillis();
-        return saveBitmap(bitmap, path, cnt + ".jpg", true, 95);
+        return saveBitmap(bitmap, path, cnt + ".jpg", true, 100);
     }
 
     public static String saveBitmap(Bitmap bitmap, String path, String fileNamePrefix, String fileNameSuffix, boolean saveAsJPEG, int quality) {
@@ -213,6 +213,22 @@ public class ImageUtil {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
+    public static Bitmap resizeBitmapMaxWidth(Bitmap bitmap, int width) {
+        if (bitmap.getWidth() > width) {
+            return resizeBitmap(bitmap, width / (float) bitmap.getWidth());
+        } else {
+            return bitmap;
+        }
+    }
+
+    public static Bitmap resizeBitmapMaxHeight(Bitmap bitmap, int height) {
+        if (bitmap.getHeight() > height) {
+            return resizeBitmap(bitmap, height / (float) bitmap.getHeight());
+        } else {
+            return bitmap;
+        }
+    }
+
     /**
      * 
      * @param bmp1
@@ -233,16 +249,25 @@ public class ImageUtil {
         int w = bmp.getWidth();
         int h = bmp.getHeight();
         if (w > h) {
-            return cut(bmp, (w - h) / 2, 0);
+            return cut(bmp, (w - h) / 2f, 0);
+        } else if (h > w) {
+            return cut(bmp, 0, (h - w) / 2f);
         } else {
-            return cut(bmp, (h - w) / 2, 0);
+            return bmp;
         }
     }
 
-    public static Bitmap cut(Bitmap bmp, int cutX, int cutY) {
-        Bitmap bmOverlay = Bitmap.createBitmap(bmp.getWidth() - 2 * cutX, bmp.getHeight() - 2 * cutY, bmp.getConfig());
+    public static Bitmap cut(Bitmap bmp, float cutMarginX, float cutMarginY) {
+        Bitmap bmOverlay = Bitmap.createBitmap(bmp.getWidth() - Math.round(2 * cutMarginX), bmp.getHeight() - Math.round(2 * cutMarginY), bmp.getConfig());
         Canvas canvas = new Canvas(bmOverlay);
-        canvas.drawBitmap(bmp, -cutX, -cutY, null);
+        canvas.drawBitmap(bmp, -cutMarginX, -cutMarginY, null);
+        return bmOverlay;
+    }
+
+    public static Bitmap cut(Bitmap bmp, int cutLeft, int cutTop, int cutRight, int cutBottom) {
+        Bitmap bmOverlay = Bitmap.createBitmap(bmp.getWidth() - (cutLeft + cutRight), bmp.getHeight() - (cutTop + cutBottom), bmp.getConfig());
+        Canvas canvas = new Canvas(bmOverlay);
+        canvas.drawBitmap(bmp, -cutLeft, -cutTop, null);
         return bmOverlay;
     }
 }

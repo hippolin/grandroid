@@ -9,7 +9,9 @@ import android.database.Cursor;
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  *
@@ -45,7 +47,11 @@ public abstract class DataHelper<T extends Identifiable> {
     public DataHelper(FaceData fd, Class<T> c, boolean createTable) {
         this.fd = fd;
         Table ann = c.getAnnotation(Table.class);
-        tableName = ann.value();
+        if (ann != null) {
+            tableName = ann.value();
+        } else {
+            tableName = c.getSimpleName();
+        }
         if (createTable) {
             create();
         }
@@ -67,6 +73,10 @@ public abstract class DataHelper<T extends Identifiable> {
         this.fd = fd;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
     /**
      * 
      * @return
@@ -82,7 +92,21 @@ public abstract class DataHelper<T extends Identifiable> {
      * @return
      */
     public boolean insert(T obj) {
-        long result = fd.insert(tableName, this.getKeyValues(obj));
+        long result = -1;
+        ContentValues cv = this.getKeyValues(obj);
+        try {
+            result = fd.insert(tableName, cv);
+        } catch (Exception ex) {
+            if (ex.toString().contains("has no column named")) {
+                if (fixTable(cv)) {
+                    try {
+                        result = fd.insert(tableName, cv);
+                    } catch (Exception ex1) {
+                        Log.e("grandroid", null, ex1);
+                    }
+                }
+            }
+        }
         if (result > -1) {
             obj.set_id((int) result);
         }
@@ -265,6 +289,40 @@ public abstract class DataHelper<T extends Identifiable> {
      */
     public void close() {
         fd.close();
+    }
+
+    public boolean fixTable(ContentValues cv) {
+        try {
+            HashSet<String> set = new HashSet<String>();
+            for (Entry<String, Object> entry : cv.valueSet()) {
+                set.add(entry.getKey());
+            }
+            Cursor cursor = fd.selectSingle(tableName, 0);
+            for (int i = 0; i < cursor.getColumnCount(); i++) {
+                set.remove(cursor.getColumnName(i));
+            }
+            cursor.close();
+            fd.close();
+            boolean result = true;
+            if (set.size() > 0) {
+                for (String key : set) {
+                    result = result && fd.addColumn(tableName, key, getColumnType(key));
+                }
+                if (result) {
+                    Log.d("grandroid", "fix table success");
+                } else {
+                    Log.e("grandroid", "fix table fail");
+                }
+            }
+            return result;
+        } catch (Exception ex) {
+            Log.e("grandroid", "fix table fail", ex);
+            return false;
+        }
+    }
+
+    public TypeMapping getColumnType(String column) {
+        return TypeMapping.STRING;
     }
 
     /**

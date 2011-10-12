@@ -51,8 +51,9 @@ public class ToastAction extends ContextAction {
      * 
      * @param length
      */
-    public void setLength(int length) {
+    public ToastAction setLength(int length) {
         this.length = length;
+        return this;
     }
 
     /**
