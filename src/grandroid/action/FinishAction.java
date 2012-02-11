@@ -12,6 +12,10 @@ import grandroid.AppStatus;
  */
 public class FinishAction extends Action {
 
+    public FinishAction(String actionName) {
+        super(actionName);
+    }
+
     /**
      * 
      * @return

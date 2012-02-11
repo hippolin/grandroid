@@ -8,8 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import android.util.Log;
 
 /**
  *
@@ -94,16 +93,16 @@ public abstract class ThreadAction extends ContextAction implements Runnable {
     }
 
     public void run() {
-        if (delayMSecond > 0) {
-            try {
+        try {
+            if (delayMSecond > 0) {
                 Thread.sleep(delayMSecond);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ThreadAction.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        this.execute();
-        if (handler != null) {
-            handler.sendEmptyMessage(0);
+            this.execute();
+            if (handler != null) {
+                handler.sendEmptyMessage(0);
+            }
+        } catch (InterruptedException ex) {
+            Log.e("grandroid", null, ex);
         }
     }
 

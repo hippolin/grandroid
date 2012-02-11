@@ -7,7 +7,7 @@ package grandroid.action;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.util.Log;
 import grandroid.view.Face;
 
 /**
@@ -43,10 +43,14 @@ public abstract class PendingAction extends ContextAction {
 
     public abstract boolean callback(boolean result, Intent data);
 
+    public void onError() {
+    }
+
     public final boolean handleActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == this.requestCode) {
-            if (data != null) {
-                callback(resultCode == Activity.RESULT_OK, data);
+            //Log.d("grandroid", "pending action is callback and handling result...");
+            if (!callback(resultCode == Activity.RESULT_OK, data)) {
+                onError();
             }
             return true;
         }

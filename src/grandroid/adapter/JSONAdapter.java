@@ -48,7 +48,7 @@ public class JSONAdapter extends BaseAdapter implements ItemClickable<JSONObject
 
     public void setArray(JSONArray array) {
         this.array = array;
-        this.notifyDataSetChanged();
+        this.notifyDataSetInvalidated();
     }
 
     /**

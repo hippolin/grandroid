@@ -53,10 +53,10 @@ public class ImageUtil {
     }
 
     /**
-     * 
+     *
      * @param url
      * @return
-     * @throws Exception  
+     * @throws Exception
      */
     public static Bitmap loadBitmap(URL url) throws Exception {
         Bitmap bitmap = null;
@@ -93,19 +93,25 @@ public class ImageUtil {
     }
 
     public static Bitmap downloadAndLoad(URL url, String path, String filename) throws Exception {
-        /* 資料夾不在就先建立 */
+        /*
+         * 資料夾不在就先建立
+         */
         File f = new File(Environment.getExternalStorageDirectory(), path);
 
         if (!f.exists()) {
             f.mkdir();
         }
-        /* 儲存相片檔 */
+        /*
+         * 儲存相片檔
+         */
         File n = new File(f, filename);
         return downloadAndLoad(url, n);
     }
 
     public static Bitmap downloadAndLoad(URL url, File file) throws Exception {
-        /* Open a connection to that URL. */
+        /*
+         * Open a connection to that URL.
+         */
         URLConnection ucon = url.openConnection();
 
         /*
@@ -123,7 +129,9 @@ public class ImageUtil {
             baf.append((byte) current);
         }
 
-        /* Convert the Bytes read to a String. */
+        /*
+         * Convert the Bytes read to a String.
+         */
         FileOutputStream fos = new FileOutputStream(file);
         byte[] imageByteArray = baf.toByteArray();
         fos.write(imageByteArray);
@@ -147,7 +155,9 @@ public class ImageUtil {
     public static String saveBitmap(Bitmap bitmap, String path, String fileNamePrefix, String fileNameSuffix, boolean saveAsJPEG, int quality) {
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             try {
-                /* 資料夾不在就先建立 */
+                /*
+                 * 資料夾不在就先建立
+                 */
                 File f = new File(Environment.getExternalStorageDirectory(), path);
                 if (!f.exists()) {
                     f.mkdir();
@@ -168,14 +178,22 @@ public class ImageUtil {
     }
 
     public static String saveBitmap(Bitmap bitmap, String path, String fileName, boolean saveAsJPEG, int quality) {
-        /* 儲存檔案 */
+        /*
+         * 儲存檔案
+         */
         if (bitmap != null) {
-            /* 檢視SDCard是否存在 */
+            /*
+             * 檢視SDCard是否存在
+             */
             if (!Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-                /* SD卡不存在，顯示Toast訊息 */
+                /*
+                 * SD卡不存在，顯示Toast訊息
+                 */
             } else {
                 try {
-                    /* 資料夾不在就先建立 */
+                    /*
+                     * 資料夾不在就先建立
+                     */
                     File f = new File(
                             Environment.getExternalStorageDirectory(), path);
 
@@ -183,19 +201,27 @@ public class ImageUtil {
                         f.mkdir();
                     }
 
-                    /* 儲存相片檔 */
+                    /*
+                     * 儲存相片檔
+                     */
                     File n = new File(f, fileName);
                     FileOutputStream bos =
                             new FileOutputStream(n.getAbsolutePath());
-                    /* 檔案轉換 */
+                    /*
+                     * 檔案轉換
+                     */
                     if (saveAsJPEG) {
                         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, bos);
                     } else {
                         bitmap.compress(Bitmap.CompressFormat.PNG, quality, bos);
                     }
-                    /* 呼叫flush()方法，更新BufferStream */
+                    /*
+                     * 呼叫flush()方法，更新BufferStream
+                     */
                     bos.flush();
-                    /* 結束OutputStream */
+                    /*
+                     * 結束OutputStream
+                     */
                     bos.close();
                     return n.getAbsolutePath();
                 } catch (Exception e) {
@@ -230,7 +256,7 @@ public class ImageUtil {
     }
 
     /**
-     * 
+     *
      * @param bmp1
      * @param bmp2
      * @param left
@@ -269,5 +295,17 @@ public class ImageUtil {
         Canvas canvas = new Canvas(bmOverlay);
         canvas.drawBitmap(bmp, -cutLeft, -cutTop, null);
         return bmOverlay;
+    }
+
+    public static Bitmap square(Bitmap bitmap, float edge) {
+        Matrix matrix = new Matrix();
+        // resize the Bitmap
+        if (bitmap.getWidth() > bitmap.getHeight()) {
+            matrix.postScale(edge / bitmap.getHeight(), edge / bitmap.getHeight());
+            return Bitmap.createBitmap(bitmap, (bitmap.getWidth() - bitmap.getHeight()) / 2, 0, bitmap.getHeight(), bitmap.getHeight(), matrix, true);
+        } else {
+            matrix.postScale(edge / bitmap.getWidth(), edge / bitmap.getWidth());
+            return Bitmap.createBitmap(bitmap, 0, (bitmap.getHeight() - bitmap.getWidth()) / 2, bitmap.getWidth(), bitmap.getWidth(), matrix, true);
+        }
     }
 }

@@ -67,35 +67,44 @@ public abstract class PickPhotoAction extends PendingAction {
     @Override
     public boolean callback(boolean result, Intent data) {
         if (result) {
-            if (bitmapWidth > 0 && bitmapHeight > 0) {
-                Bitmap photo = data.getParcelableExtra("data");
-                execute(context, photo);
-            } else {
-                InputStream imageStream = null;
-                try {
-                    Uri selectedImage = data.getData();
-                    imageStream = context.getContentResolver().openInputStream(selectedImage);
-                    Bitmap photo = BitmapFactory.decodeStream(imageStream);
-
-                    if (android.os.Build.DEVICE.equals("GT-I9000")) {
-                        Matrix mtx = new Matrix();
-                        mtx.postRotate(90);
-                        photo = Bitmap.createBitmap(photo, 0, 0, photo.getWidth(), photo.getHeight(), mtx, true);
-                    }
-
-                    execute(context, photo);
-                } catch (FileNotFoundException ex) {
-                    Log.e("grandroid", null, ex);
-                } finally {
+            try {
+                Bitmap photo = null;
+                if (bitmapWidth > 0 && bitmapHeight > 0) {
+                    photo = data.getParcelableExtra("data");
+                } else {
+                    InputStream imageStream = null;
                     try {
-                        imageStream.close();
-                    } catch (IOException ex) {
+                        Uri selectedImage = data.getData();
+                        imageStream = context.getContentResolver().openInputStream(selectedImage);
+                        photo = BitmapFactory.decodeStream(imageStream);
+                        Log.d("grandroid", "android.os.Build.BRAND=" + android.os.Build.BRAND + ", android.os.Build.DEVICE=" + android.os.Build.DEVICE);
+                        if (android.os.Build.DEVICE.equals("GT-I9000")) {
+                            Matrix mtx = new Matrix();
+                            mtx.postRotate(90);
+                            photo = Bitmap.createBitmap(photo, 0, 0, photo.getWidth(), photo.getHeight(), mtx, true);
+                        }
+                    } catch (FileNotFoundException ex) {
                         Log.e("grandroid", null, ex);
+                    } finally {
+                        try {
+                            imageStream.close();
+                        } catch (IOException ex) {
+                            Log.e("grandroid", null, ex);
+                        }
                     }
                 }
+//            if (android.os.Build.BRAND.equals("lge")) {
+//                Matrix mtx = new Matrix();
+//                mtx.postScale(-1, -1);
+//                photo = Bitmap.createBitmap(photo, 0, 0, photo.getWidth(), photo.getHeight(), mtx, true);
+//            }
+                execute(context, photo);
+                return true;
+            } catch (Exception e) {
+                Log.e("grandroid", null, e);
             }
         }
-        return true;
+        return false;
     }
 
     public abstract void execute(Context context, Bitmap bitmap);

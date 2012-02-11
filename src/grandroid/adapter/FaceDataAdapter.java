@@ -53,7 +53,7 @@ public abstract class FaceDataAdapter<T extends Identifiable> extends ObjectAdap
             } else {
                 list = helper.select();
             }
-            this.notifyDataSetChanged();
+            this.notifyDataSetInvalidated();
         }else{
             available=true;
         }

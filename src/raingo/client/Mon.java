@@ -21,32 +21,60 @@ import org.json.JSONObject;
 
 /**
  * HTTP連線物件，用來擷取網頁的回傳結果，可用在取得JSON字串或網頁HTML的時候，支援POST。
+ *
  * @author Rovers
  */
 public class Mon {
 
     /**
-     * 
+     *
      */
     protected String uri;
     /**
-     * 
+     *
      */
     protected HashMap<String, String> param;
     protected String encoding;
+    protected static String cookie = null;
+    protected boolean keepingCookie = false;
+    protected boolean loginConnection = false;
+
+    ;
 
     /**
-     * 
+     *
      * @param uri 欲擷取資料的URL
      */
     public Mon(String uri) {
         this.uri = uri;
         this.encoding = "UTF-8";
+
         param = new HashMap<String, String>();
+    }
+
+    protected Mon getLoginMon() {
+        return null;
+    }
+
+    protected Mon asLoginConnection() {
+        loginConnection = true;
+        return this;
+    }
+
+    protected void handleLogin(String result) {
+    }
+
+    public boolean isKeepingCookie() {
+        return keepingCookie;
+    }
+
+    public void setKeepingCookie(boolean keepingCookie) {
+        this.keepingCookie = keepingCookie;
     }
 
     /**
      * 伺服端服務網址
+     *
      * @return
      */
     public String getUri() {
@@ -60,6 +88,7 @@ public class Mon {
 
     /**
      * 新增一組傳輸參數
+     *
      * @param key 參數的名字
      * @param value 參數值
      * @return Mon物件本身，方便串接
@@ -78,6 +107,7 @@ public class Mon {
 
     /**
      * 取得參數內容 (實作方式為TreeMap.toString())
+     *
      * @return
      */
     public String getParamaters() {
@@ -90,6 +120,7 @@ public class Mon {
 
     /**
      * 開始連線傳輸，並將結果JSON文字包成JSONObject回傳
+     *
      * @return server端回傳的JSON文字所包裝成的JSONObject
      * @throws JSONException
      */
@@ -99,6 +130,7 @@ public class Mon {
 
     /**
      * 開始連線傳輸，並將結果JSON文字包成JSONArray回傳
+     *
      * @return server端回傳的JSON文字所包裝成的JSONArray
      * @throws JSONException
      */
@@ -108,57 +140,78 @@ public class Mon {
 
     /**
      * 開始連線傳輸
+     *
      * @return server端回應的字串傳回
      */
     public String send() {
         try {
             URL url = new URL(uri);
             HttpURLConnection httpConn = (HttpURLConnection) url.openConnection();
-
-            ////设置连接属性
-            httpConn.setDoOutput(true);//使用 URL 连接进行输出
-            httpConn.setDoInput(true);//使用 URL 连接进行输入
-            httpConn.setUseCaches(false);//忽略缓存
-            httpConn.setRequestMethod("POST");//设置URL请求方法
-            String requestString = "";
-            for (String key : param.keySet()) {
-                String encodedValue = key + "=" + URLEncoder.encode(param.get(key).replaceAll("\\\\/", "/"), "UTF-8");
-                requestString += requestString.length() == 0 ? encodedValue : "&" + encodedValue;
-            }
-            byte[] requestStringBytes = requestString.getBytes("UTF-8");
-            //httpConn.setRequestProperty("Content-length", "" + requestStringBytes.length);
-            httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            httpConn.setRequestProperty("Connection", "Keep-Alive");// 维持长连接
-            httpConn.setRequestProperty("Charset", "UTF-8");
-            //
-
-            //建立输出流，并写入数据
-            OutputStream outputStream = httpConn.getOutputStream();
-            outputStream.write(requestStringBytes);
-            outputStream.close();
-            //获得响应状态
-            int responseCode = httpConn.getResponseCode();
-            if (HttpURLConnection.HTTP_OK == responseCode) {//连接成功
-
-                //当正确响应时处理数据
-                StringBuilder sb = new StringBuilder();
-                String readLine;
-                BufferedReader responseReader;
-                if (httpConn.getHeaderField("Content-Type") != null && httpConn.getHeaderField("Content-Type").contains("charset")) {
-                    encoding = httpConn.getHeaderField("Content-Type").substring(httpConn.getHeaderField("Content-Type").indexOf("charset=") + 8);
-                    if (encoding.contains(";")) {
-                        encoding = encoding.substring(0, encoding.indexOf(";"));
+            if (keepingCookie) {
+                if (cookie == null) {
+                    Log.d("grandroid", "login...");
+                    Mon logMon = getLoginMon();
+                    if (logMon != null) {
+                        handleLogin(logMon.asLoginConnection().send());
+                    } else {
+                        throw new Exception("You must overwrite getLoginMon method in Mon first");
                     }
                 }
-                //处理响应流，必须与服务器响应流输出的编码一致
-                responseReader = new BufferedReader(new InputStreamReader(httpConn.getInputStream(), encoding));
-                while ((readLine = responseReader.readLine()) != null) {
-                    sb.append(readLine).append("\n");
+            }
+            if (!keepingCookie || cookie != null) {
+                ////设置连接属性
+                httpConn.setDoOutput(true);//使用 URL 连接进行输出
+                httpConn.setDoInput(true);//使用 URL 连接进行输入
+                httpConn.setUseCaches(false);//忽略缓存
+                httpConn.setRequestMethod("POST");//设置URL请求方法
+                String requestString = "";
+                for (String key : param.keySet()) {
+                    String encodedValue = key + "=" + URLEncoder.encode(param.get(key).replaceAll("\\\\/", "/"), "UTF-8");
+                    requestString += requestString.length() == 0 ? encodedValue : "&" + encodedValue;
                 }
-                responseReader.close();
-                return sb.toString().trim();
+                byte[] requestStringBytes = requestString.getBytes("UTF-8");
+                //httpConn.setRequestProperty("Content-length", "" + requestStringBytes.length);
+                httpConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                httpConn.setRequestProperty("Connection", "Keep-Alive");// 维持长连接
+                httpConn.setRequestProperty("Charset", "UTF-8");
+                if (keepingCookie && cookie != null) {
+                    httpConn.setRequestProperty("Cookie", cookie);
+                }
+                httpConn.connect();
+                //
+                //建立输出流，并写入数据
+                OutputStream outputStream = httpConn.getOutputStream();
+                outputStream.write(requestStringBytes);
+                outputStream.close();
+                //获得响应状态
+                int responseCode = httpConn.getResponseCode();
+                if (HttpURLConnection.HTTP_OK == responseCode) {//连接成功
+                    if (loginConnection) {
+                        getCookie(httpConn);
+                    }
+
+                    //当正确响应时处理数据
+                    StringBuilder sb = new StringBuilder();
+                    String readLine;
+                    BufferedReader responseReader;
+                    if (httpConn.getHeaderField("Content-Type") != null && httpConn.getHeaderField("Content-Type").contains("charset")) {
+                        encoding = httpConn.getHeaderField("Content-Type").substring(httpConn.getHeaderField("Content-Type").indexOf("charset=") + 8);
+                        if (encoding.contains(";")) {
+                            encoding = encoding.substring(0, encoding.indexOf(";"));
+                        }
+                    }
+                    //处理响应流，必须与服务器响应流输出的编码一致
+                    responseReader = new BufferedReader(new InputStreamReader(httpConn.getInputStream(), encoding));
+                    while ((readLine = responseReader.readLine()) != null) {
+                        sb.append(readLine).append("\n");
+                    }
+                    responseReader.close();
+                    return sb.toString().trim();
+                } else {
+                    return "{\"msg\":\"Mon connect fail\",\"code\":" + responseCode + "}";
+                }
             } else {
-                return "{\"msg\":\"Mon connect fail\",\"code\":" + responseCode + "}";
+                throw new Exception("Login fail in Mon");
             }
         } catch (Exception ex) {
             Log.e("grandroid", null, ex);
@@ -166,8 +219,24 @@ public class Mon {
         }
     }
 
+    protected void getCookie(HttpURLConnection connection) {
+        String cookieVal = null;
+        cookie = "";
+        String key = null;
+        for (int i = 1; (key = connection.getHeaderFieldKey(i)) != null; i++) {
+            if (key.equalsIgnoreCase("set-cookie")) {
+                cookieVal = connection.getHeaderField(i);
+                cookieVal = cookieVal.substring(0, cookieVal.indexOf(";"));
+                cookie = cookie + cookieVal + ";";
+            }
+        }
+        if (cookie.length() == 0) {
+            cookie = null;
+        }
+    }
+
     /**
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {

@@ -16,11 +16,11 @@ import android.view.Display;
 public class LayoutUtil {
 
     /**
-     * 
+     *
      */
     protected int width;
     /**
-     * 
+     *
      */
     protected int height;
     protected DisplayMetrics metrics;
@@ -32,9 +32,11 @@ public class LayoutUtil {
     protected int excluseSpace;
     protected int cumulatePadding;
     protected int orientation;
+    protected int density;
 
     /**
      * default setting: statusBar=true, titleBar=false, compatibleMode=true;
+     *
      * @param activity
      */
     public LayoutUtil(Activity activity) {
@@ -49,7 +51,6 @@ public class LayoutUtil {
 
         Display display = frame.getWindowManager().getDefaultDisplay();
         display.getMetrics(metrics);
-
         width = metrics.widthPixels;
         height = metrics.heightPixels;
 
@@ -74,7 +75,7 @@ public class LayoutUtil {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public int getHeight() {
@@ -82,7 +83,7 @@ public class LayoutUtil {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public int getWidth() {
@@ -97,8 +98,12 @@ public class LayoutUtil {
         return Math.round(metrics.widthPixels * metrics.density);
     }
 
+    public int getDensityDPI() throws Exception {
+        return metrics.densityDpi;
+    }
+
     /**
-     * 
+     *
      * @param size
      * @return
      */
