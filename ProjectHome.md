@@ -1,0 +1,1 @@
+The main goal of grandroid is help developer create a powerful and robust android app quickly.
